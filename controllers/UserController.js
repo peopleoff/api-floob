@@ -25,43 +25,54 @@ current_viewers.belongsTo(users, {
 })
 
 function tokenLogin(token, res) {
-  try {
-    decoded = jwt.verify(token, jwtSecret).user
-    let username = decoded.username.toLowerCase()
+    decoded = jwt.verify(token, jwtSecret).user;
+    let username = decoded.username_lowercase
     let password = decoded.password
     users
-      .findOne({
-        active: 1,
-        username: username,
-        password: password
-      })
-      .then(response => {
-        if (!response) {
-          return res.send({
-            error: true,
-            type: 'error',
-            message: 'Username or Password is incorrect'
-          })
-        } else {
-          let token = signUser(response)
-          let user = {
-            id: response.id,
-            email: response.email,
-            username: response.username
+        .findOne({
+          where: {
+            [Op.or]: [
+              { email_lowercase: username },
+              { username_lowercase: username }
+            ]
           }
-          return res.send({
-            token: token,
-            user: user
-          })
-        }
-      })
-  } catch (err) {
-    return res.send({
-      error: true,
-      type: 'error',
-      message: err
-    })
-  }
+        })
+        .then(response => {
+          console.log(response);
+          if (!response) {
+            return res.send({
+              error: true,
+              type: 'error',
+              message: 'Username or Password is incorrect'
+            })
+          } else {
+            console.log(password);
+            console.log(response.password);
+            let passwordMatch = bcrypt.compareSync(
+              password,
+              response.password
+            )
+            console.log(passwordMatch);
+            if (passwordMatch) {
+              let token = signUser(response)
+              let user = {
+                id: response.id,
+                email: response.email,
+                username: response.username
+              }
+              return res.send({
+                token: token,
+                user: user
+              })
+            } else {
+              return res.send({
+                error: true,
+                type: 'error',
+                message: 'Username or Password is incorrect'
+              })
+            }
+          }
+        })
 }
 
 module.exports = {

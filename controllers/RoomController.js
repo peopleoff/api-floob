@@ -1,4 +1,4 @@
-const { rooms, users_rooms, users, current_viewers } = require('../models')
+const { rooms, users_rooms, users, current_viewers, videos } = require('../models')
 const fs = require('fs')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -8,6 +8,9 @@ users_rooms.belongsTo(rooms, { as: 'roomInfo', foreignKey: 'room' })
 
 rooms.hasMany(current_viewers, { foreignKey: 'room' })
 current_viewers.belongsTo(rooms, { as: 'viewerInfos', foreignKey: 'room' })
+
+rooms.hasMany(videos, { foreignKey: 'room' })
+videos.belongsTo(rooms, { as: 'videoInfo', foreignKey: 'room' })
 
 fs.readFile('./roomNames/animeNames.json', handleFile)
 let animeNames
@@ -30,18 +33,19 @@ module.exports = {
       .findAll({
         include: [
           {
-            model: current_viewers
+            model: videos
           }
         ]
       })
       .then(result => {
+        console.log(result);
         //Set result to global var
         publicRooms = result.sort((one, other) => {
           //a - b is
           //   0 when elements are the same
           //  >0 when a > b
           //  <0 when a < b
-          return other.current_viewers.length - one.current_viewers.length
+          return other.videos.length - one.videos.length
         })
         return res.send({
           publicRooms: publicRooms,
