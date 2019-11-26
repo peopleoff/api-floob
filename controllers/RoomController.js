@@ -38,7 +38,6 @@ module.exports = {
         ]
       })
       .then(result => {
-        console.log(result);
         //Set result to global var
         publicRooms = result.sort((one, other) => {
           //a - b is
