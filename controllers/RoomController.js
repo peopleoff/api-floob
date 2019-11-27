@@ -26,8 +26,9 @@ function randomName() {
 }
 module.exports = {
   getAll(req, res) {
-    let publicRooms = []
-    let favoriteRooms = []
+    let publicRooms = [];
+    let sponsoredRooms = [];
+    let recommendedRooms = [];
     //First find all public rooms
     rooms
       .findAll({
@@ -39,16 +40,47 @@ module.exports = {
       })
       .then(result => {
         //Set result to global var
-        publicRooms = result.sort((one, other) => {
-          //a - b is
-          //   0 when elements are the same
-          //  >0 when a > b
-          //  <0 when a < b
-          return other.videos.length - one.videos.length
-        })
+        // publicRooms = result.sort((one, other) => {
+        //   //a - b is
+        //   //   0 when elements are the same
+        //   //  >0 when a > b
+        //   //  <0 when a < b
+        //   return other.videos.length - one.videos.length
+        // });
+        publicRooms = result.filter(room => {
+          return room.type === 2
+        });
+        sponsoredRooms = result.filter(room => {
+          return room.type === 3
+        });
+        recommendedRooms = result.filter(room => {
+          return room.type === 5
+        });
+        // publicRooms = publicRooms.sort((one, other) => {
+        //   //a - b is
+        //   //   0 when elements are the same
+        //   //  >0 when a > b
+        //   //  <0 when a < b
+        //   return other.videos.length - one.videos.length
+        // });
+        // sponsoredRooms = sponsoredRooms.sort((one, other) => {
+        //   //a - b is
+        //   //   0 when elements are the same
+        //   //  >0 when a > b
+        //   //  <0 when a < b
+        //   return other.videos.length - one.videos.length
+        // });
+        // recommendedRooms = recommendedRooms.sort((one, other) => {
+        //   //a - b is
+        //   //   0 when elements are the same
+        //   //  >0 when a > b
+        //   //  <0 when a < b
+        //   return other.videos.length - one.videos.length
+        // });
         return res.send({
           publicRooms: publicRooms,
-          favoriteRooms: favoriteRooms
+          sponsoredRooms: sponsoredRooms,
+          recommendedRooms: recommendedRooms
         })
         // if (!req.body.user) {
         // }
