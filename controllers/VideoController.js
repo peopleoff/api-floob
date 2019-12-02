@@ -69,13 +69,13 @@ module.exports = {
       getVideoInfo(videoID)
         .then(result => {
           let videoInfo = result.data.items[0].snippet
-          console.log(videoInfo);
+          // let nsfw = result.data.items[0].contentDetails.contentRating;
           let newVideo = {
             videoID: videoID,
             room: roomID,
             title: videoInfo.title,
             channel: videoInfo.channelTitle,
-            image: videoInfo.thumbnails.maxres.url,
+            image: videoInfo.thumbnails.high.url,
             user: user.id
           }
           videos

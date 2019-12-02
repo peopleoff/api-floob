@@ -210,6 +210,9 @@ module.exports = {
         message: 'Error'
       })
     }
+    if(req.body.room.keepRoom == true){
+      req.body.room.type = 4
+    }
     rooms
       .update(req.body.room, {
         where: {
