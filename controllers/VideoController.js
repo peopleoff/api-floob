@@ -1,5 +1,12 @@
-const { videos, vote_to_skip, rooms } = require('../models')
+const { videos, vote_to_skip, rooms, users } = require('../models')
 const { getVideoID, getVideoInfo } = require('../functions')
+
+videos.hasOne(users, {
+  foreignKey: 'id',
+  sourceKey: 'user',
+  as: 'userInfo',
+  constraints: false
+})
 
 module.exports = {
   getAll(id) {
@@ -9,6 +16,13 @@ module.exports = {
           where: {
             room: id
           },
+          include: [
+            {
+              model: users,
+              attributes: ['username'],
+              as: 'userInfo'
+            }
+          ],
           order: [['createdAt', 'ASC']]
         })
         .then(result => {
@@ -20,36 +34,41 @@ module.exports = {
     })
   },
   getVideos(req, res) {
-      videos
-        .findAll({
-          where: {
-            room: req.query.roomID
-          },
-          order: [['createdAt', 'ASC']]
-        })
-        .then(result => {
-          return res.send(result);
-        })
-        .catch(error => {
-          return res.send(error);
-        })
+    videos
+      .findAll({
+        where: {
+          room: req.query.roomID
+        },
+        include: [
+          {
+            model: users
+          }
+        ],
+        order: [['createdAt', 'ASC']]
+      })
+      .then(result => {
+        return res.send(result)
+      })
+      .catch(error => {
+        return res.send(error)
+      })
   },
   postVideo(req, res) {
-    let io = req.app.get('io');
+    let io = req.app.get('io')
     module.exports
       .addVideo(req.body)
       .then(result => {
-        if(result){
+        if (result) {
           module.exports
-          .getAll(req.body.roomID)
-          .then(videoResult => {
-            io.sockets.in(req.body.roomID).emit('getVideos', videoResult)
-          })
-          .catch(error => {
-            catchError(error)
-          })
+            .getAll(req.body.roomID)
+            .then(videoResult => {
+              io.sockets.in(req.body.roomID).emit('getVideos', videoResult)
+            })
+            .catch(error => {
+              catchError(error)
+            })
         }
-        return res.send(result);
+        return res.send(result)
       })
       .catch(error => {
         console.error(error)
