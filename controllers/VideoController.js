@@ -65,7 +65,7 @@ module.exports = {
       } else {
         videoID = getVideoID('v', videoLink)
       }
-      getVideoInfo(videoID, roomID, user)
+      getVideoInfo(videoID, roomID, user.id)
         .then(result => {
           let videoInfo = result.data.items[0].snippet
           // let nsfw = result.data.items[0].contentDetails.contentRating;
