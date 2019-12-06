@@ -42,14 +42,14 @@ module.exports = {
     return response;
   },
 
-  videoSearch(q) {
+  videoSearch(payload) {
     var service = google.youtube("v3");
     let response = service.search.list({
       auth: process.env.API_FLOOB_YOUTUBEAPI,
       part: "snippet",
       maxResults: "10",
       type: "video",
-      q: q
+      q: payload.search
     });
     return response;
   },

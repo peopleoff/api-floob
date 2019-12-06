@@ -35,7 +35,6 @@ module.exports = {
         })
   },
   postVideo(req, res) {
-    console.log(req.body);
     let io = req.app.get('io');
     module.exports
       .addVideo(req.body)
@@ -66,7 +65,7 @@ module.exports = {
       } else {
         videoID = getVideoID('v', videoLink)
       }
-      getVideoInfo(videoID)
+      getVideoInfo(videoID, roomID, user)
         .then(result => {
           let videoInfo = result.data.items[0].snippet
           // let nsfw = result.data.items[0].contentDetails.contentRating;

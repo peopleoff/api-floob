@@ -45,7 +45,7 @@ function addMessage(payload, socket) {
 }
 
 function searchVideos(payload, socket) {
-  videoSearch(payload.search).then(results => {
+  videoSearch(payload).then(results => {
     if (results) {
       socket.emit('searchResult', results.data.items)
     }
