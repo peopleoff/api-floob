@@ -18,8 +18,8 @@ app.use(cors())
 
 require('./routes')(app)
 
-const server = app.listen(3000, function() {
-  console.log('server running on port 3000')
+const server = app.listen(4000, function() {
+  console.log('server running on port 4000')
 })
 
 sequelize.sync({ force: false }).then(() => {
