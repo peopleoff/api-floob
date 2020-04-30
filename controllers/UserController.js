@@ -111,13 +111,11 @@ module.exports = {
             let user = {
               id: response.id,
               email: response.email,
-              username: response.username
+              username: response.username,
+              token: token
             }
-            welcomeEmail(response.email)
-            return res.send({
-              token: token,
-              user: user
-            })
+            //welcomeEmail(response.email)
+            return res.status(200).send(user)
           })
         }
       })
@@ -133,8 +131,7 @@ module.exports = {
   login(req, res) {
     //If no post data is sent, return error
     if (!req.body) {
-      return res.send({
-        error: true,
+      return res.status(401).send({
         type: 'error',
         message: 'Error'
       })
@@ -154,9 +151,7 @@ module.exports = {
         })
         .then(response => {
           if (!response) {
-            return res.send({
-              error: true,
-              type: 'error',
+            return res.status(401).json({
               message: 'Username or Password is incorrect'
             })
           } else {
@@ -169,15 +164,12 @@ module.exports = {
               let user = {
                 id: response.id,
                 email: response.email,
-                username: response.username
+                username: response.username,
+                token: token
               }
-              return res.send({
-                token: token,
-                user: user
-              })
+              return res.status(200).send(user)
             } else {
-              return res.send({
-                error: true,
+              return res.status(401).send({
                 type: 'error',
                 message: 'Username or Password is incorrect'
               })

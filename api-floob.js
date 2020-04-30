@@ -34,14 +34,15 @@ const io = require('socket.io')(server, {
 app.set('io', io);
 
 // <----------------------------Socket Functions----------------------------> //
-function addMessage(payload, socket) {
+function sendMessage(payload) {
   let newMessage = {
     id: guid(),
     username: payload.user.username,
     message: payload.message
   }
+  console.log(payload);
   io.sockets.in(payload.roomID).emit('newMessage', newMessage)
-  MessageController.addMessage(payload)
+  MessageController.saveMessage(payload)
 }
 
 function searchVideos(payload, socket) {
@@ -177,7 +178,7 @@ function voteToSkip(payload, socket) {
 
 // <----------------------------Socket.io Listeners----------------------------> //
 io.on('connection', socket => {
-  socket.on('newRoom', payload => {
+  socket.on('joinedRoom', payload => {
     socket.join(payload.roomID)
     newUser(payload, socket)
   })
@@ -188,8 +189,8 @@ io.on('connection', socket => {
   socket.on('getCurrentViewers', payload => {
     getCurrentViewers(payload, socket)
   })
-  socket.on('addMessage', payload => {
-    addMessage(payload, socket)
+  socket.on('sendMessage', payload => {
+    sendMessage(payload, socket)
   })
   socket.on('voteToSkip', payload => {
     voteToSkip(payload, socket)

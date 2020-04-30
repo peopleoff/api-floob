@@ -1,7 +1,7 @@
 const { messages } = require('../models')
 
 module.exports = {
-  addMessage(payload) {
+  saveMessage(payload) {
     let newMessage = {
       user: payload.user.id,
       room: payload.roomID,
