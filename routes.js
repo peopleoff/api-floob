@@ -8,7 +8,7 @@ module.exports = (app) => {
     app.get('/videos/getVideos', VideoController.getVideos);
     // // Post Requests
     app.post('/videos/postVideo', VideoController.postVideo);
-    app.post('/videos/getThumbnail', VideoController.getThumbnail);
+    app.post('/videos/search', VideoController.searchVideos);
     //User's Requests
     app.post('/users/register', UserController.register);
     app.post('/users/login', UserController.login);

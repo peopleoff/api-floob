@@ -91,6 +91,7 @@ module.exports = {
   },
 
   catchError(error) {
+    console.log("test")
     throw error
   },
 

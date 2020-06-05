@@ -2,7 +2,11 @@ module.exports = function(sequelize, DataTypes) {
   const videos = sequelize.define(
     "videos",
     {
-      videoID: {
+      src: {
+        type: DataTypes.STRING(500),
+        allowNull: false
+      },
+      provider: {
         type: DataTypes.STRING(500),
         allowNull: false
       },

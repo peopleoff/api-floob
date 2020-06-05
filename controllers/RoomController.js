@@ -143,6 +143,7 @@ module.exports = {
         return res.status(200).send(room);
       })
       .catch((error) => {
+        console.error("here");
         console.log(error.message);
         return res.status(401).send({
           type: "error",
@@ -249,6 +250,7 @@ module.exports = {
         message: "Error",
       });
     }
+    console.log(req.body);
     //Check if user already has an active room
     let currentRoom = await rooms.findOne({
       where: {
@@ -282,6 +284,7 @@ module.exports = {
               });
             })
             .catch((createdError) => {
+              console.log(createdError);
               return res.send({
                 error: true,
                 type: "error",
@@ -290,6 +293,7 @@ module.exports = {
             });
         })
         .catch((error) => {
+          console.error(error)
           return res.send({
             error: true,
             type: "error",
