@@ -24,8 +24,8 @@ require("./routes")(app);
 
 // app.use(Sentry.Handlers.errorHandler());
 
-const server = app.listen(4000, function () {
-  console.log("server running on port 4000");
+const server = app.listen(process.env.PORT, function () {
+  console.log(`server running on port ${process.env.PORT}`);
 });
 
 sequelize.sync({ force: false }).then(() => {
