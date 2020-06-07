@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const morgan = require("morgan");
 const allowedOrigins =
-  "https://floob.gg:* https://www.floob.gg:* http://localhost:*";
+  "https://floob.dev:* https://www.floob.dev:* http://localhost:*";
 const { sequelize } = require("./models");
 const { catchError, videoSearch, guid } = require("./functions");
 const VideoController = require("./controllers/VideoController");
