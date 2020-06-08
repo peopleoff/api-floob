@@ -1,5 +1,5 @@
 const { videos, vote_to_skip, rooms, users } = require("../models");
-const { getVideoID, getVideoInfo } = require("../functions");
+const { addYouTubeVideo, searchYoutubeVideo } = require("./YouTubeController");
 
 videos.hasOne(users, {
   foreignKey: "id",
@@ -10,7 +10,9 @@ videos.hasOne(users, {
 
 module.exports = {
   /*
+  ===================================================================
   Socket IO Functions
+  ===================================================================
 */
   getAll(id) {
     return new Promise((resolve, reject) => {
@@ -36,36 +38,21 @@ module.exports = {
         });
     });
   },
-  addVideo(payload) {
+  addVideo(video, provider, room, user) {
     return new Promise((resolve, reject) => {
-      const { videoLink, roomID, pure, user } = payload;
-      videoID = "";
-      //Pure means Pure video ID was passed
-      if (pure) {
-        videoID = videoLink;
-      } else {
-        videoID = getVideoID("v", videoLink);
-      }
-      getVideoInfo(videoID, roomID, user.id)
+      let newVideo = {
+        src: video.videoID,
+        provider: provider,
+        room: room,
+        title: video.title,
+        channel: video.channel,
+        image: video.image,
+        user: user,
+      };
+      videos
+        .create(newVideo)
         .then((result) => {
-          let videoInfo = result.data.items[0].snippet;
-          // let nsfw = result.data.items[0].contentDetails.contentRating;
-          let newVideo = {
-            videoID: videoID,
-            room: roomID,
-            title: videoInfo.title,
-            channel: videoInfo.channelTitle,
-            image: videoInfo.thumbnails.high.url,
-            user: user.id,
-          };
-          videos
-            .create(newVideo)
-            .then((result) => {
-              resolve(result);
-            })
-            .catch((error) => {
-              reject(error);
-            });
+          resolve(result);
         })
         .catch((error) => {
           reject(error);
@@ -143,10 +130,14 @@ module.exports = {
     });
   },
   /*
+  ===================================================================
   Socket IO Functions
+  ===================================================================
 */
   /*
+  ===================================================================
   Routes Functions
+  ===================================================================
 */
   getVideos(req, res) {
     videos
@@ -169,31 +160,53 @@ module.exports = {
       });
   },
   postVideo(req, res) {
+    const { video, provider, roomID, userID } = req.body;
     let io = req.app.get("io");
-    module.exports
-      .addVideo(req.body)
-      .then((result) => {
-        if (result) {
-          module.exports
-            .getAll(req.body.roomID)
-            .then((videoResult) => {
-              io.sockets.in(req.body.roomID).emit("getVideos", videoResult);
-            })
-            .catch((error) => {
-              catchError(error);
-            });
-        }
-        return res.send(result);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+
+    switch (provider) {
+      case 1:
+        console.log("Youtube");
+        addYouTubeVideo(video, provider, roomID, userID)
+          .then((result) => {
+            io.sockets.in(roomID).emit("getVideos", result);
+            res.status(200).send(result);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
+      case 1:
+        console.log("Vimeo");
+        break;
+
+      default:
+        console.log("None");
+        break;
+    }
   },
   searchVideos(req, res) {
     console.log(req.body);
-    switch (req.body.platformID) {
+    const { query, provider, roomID, userID } = req.body;
+    switch (provider) {
       case 1:
         console.log("searching Youtube");
+        searchYoutubeVideo(query)
+          .then((result) => {
+            let searchResults = [];
+            result.forEach((element) => {
+              searchResults.push({
+                src: element.id.videoId,
+                title: element.snippet.title,
+                channel: element.snippet.channel,
+                image: element.snippet.thumbnails.high.url,
+                provider: provider
+              });
+            });
+            res.status(200).send(searchResults);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
         break;
       case 2:
         console.log("searching Vimeo");
@@ -202,20 +215,10 @@ module.exports = {
       default:
         break;
     }
-    let array = [
-      {
-        title:
-          "This NEW Troll Level Is the Most BRUTAL One I've Played Yet (Super Mario Maker 2)",
-        channel: "raysfire",
-      },
-      {
-        title: "Esther",
-        channel: "Rebecca Halfon",
-      },
-    ];
-    res.send(array);
   },
   /*
+  ===================================================================
   Routes Functions
+  ===================================================================
 */
 };

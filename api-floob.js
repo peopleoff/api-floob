@@ -198,26 +198,26 @@ function syncVideo(payload, socket) {
   io.sockets.in(payload.roomID).emit("syncVideo", payload.seconds);
 }
 
-function addVideo(payload, socket) {
-  VideoController.addVideo(payload)
-    .then((result) => {
-      VideoController.getAll(payload.roomID)
-        .then((videoResult) => {
-          io.sockets.in(payload.roomID).emit("getVideos", videoResult);
-          io.to(socket.id).emit("updateSnackbar", {
-            error: false,
-            type: "success",
-            message: "Video Added",
-          });
-        })
-        .catch((error) => {
-          catchError(error);
-        });
-    })
-    .catch((error) => {
-      catchError(error);
-    });
-}
+// function addVideo(payload, socket) {
+//   VideoController.addVideo(payload)
+//     .then((result) => {
+//       VideoController.getAll(payload.roomID)
+//         .then((videoResult) => {
+//           io.sockets.in(payload.roomID).emit("getVideos", videoResult);
+//           io.to(socket.id).emit("updateSnackbar", {
+//             error: false,
+//             type: "success",
+//             message: "Video Added",
+//           });
+//         })
+//         .catch((error) => {
+//           catchError(error);
+//         });
+//     })
+//     .catch((error) => {
+//       catchError(error);
+//     });
+// }
 
 function removeVideo(payload, socket) {
   console.log(payload);
@@ -292,9 +292,9 @@ io.on("connection", (socket) => {
     newUser(payload, socket);
   });
 
-  socket.on("addVideo", (payload) => {
-    addVideo(payload, socket);
-  });
+  // socket.on("addVideo", (payload) => {
+  //   addVideo(payload, socket);
+  // });
   // socket.on('getCurrentViewers', payload => {
   //   getCurrentViewers(payload, socket)
   // })
