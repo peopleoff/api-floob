@@ -1,5 +1,6 @@
 const { videos, vote_to_skip, rooms, users } = require("../models");
 const { addYouTubeVideo, searchYoutubeVideo } = require("./YouTubeController");
+const { searchVimeoVideo, addVimeoVideo } = require("./VimeoController");
 
 videos.hasOne(users, {
   foreignKey: "id",
@@ -160,23 +161,44 @@ module.exports = {
       });
   },
   postVideo(req, res) {
-    const { video, provider, roomID, userID } = req.body;
     let io = req.app.get("io");
 
-    switch (provider) {
+    switch (req.body.provider) {
       case 1:
         console.log("Youtube");
-        addYouTubeVideo(video, provider, roomID, userID)
+        addYouTubeVideo(req.body)
           .then((result) => {
-            io.sockets.in(roomID).emit("getVideos", result);
-            res.status(200).send(result);
+            module.exports
+              .getAll(req.body.room)
+              .then((result) => {
+                io.sockets.in(req.body.room).emit("getVideos", result);
+                res.status(200).send(result);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
           })
           .catch((error) => {
             console.error(error);
           });
         break;
-      case 1:
+      case 2:
         console.log("Vimeo");
+        addVimeoVideo(req.body)
+          .then((result) => {
+            module.exports
+              .getAll(req.body.room)
+              .then((result) => {
+                io.sockets.in(req.body.room).emit("getVideos", result);
+                res.status(200).send(result);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
         break;
 
       default:
@@ -185,24 +207,13 @@ module.exports = {
     }
   },
   searchVideos(req, res) {
-    console.log(req.body);
-    const { query, provider, roomID, userID } = req.body;
+    const { query, provider } = req.body;
     switch (provider) {
       case 1:
         console.log("searching Youtube");
-        searchYoutubeVideo(query)
+        searchYoutubeVideo(query, provider)
           .then((result) => {
-            let searchResults = [];
-            result.forEach((element) => {
-              searchResults.push({
-                src: element.id.videoId,
-                title: element.snippet.title,
-                channel: element.snippet.channel,
-                image: element.snippet.thumbnails.high.url,
-                provider: provider
-              });
-            });
-            res.status(200).send(searchResults);
+            res.status(200).send(result);
           })
           .catch((error) => {
             console.error(error);
@@ -210,6 +221,13 @@ module.exports = {
         break;
       case 2:
         console.log("searching Vimeo");
+        searchVimeoVideo(query, provider)
+          .then((result) => {
+            res.status(200).send(result);
+          })
+          .catch((error) => {
+            res.status(403).send(error);
+          });
         break;
 
       default:

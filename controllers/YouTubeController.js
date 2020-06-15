@@ -35,6 +35,10 @@ async function getYouTubeSearch(query) {
   return response;
 }
 
+function parseImage(imageObject) {
+  let objectToArray = Object.values(imageObject);
+  return objectToArray[objectToArray.length - 1].url;
+}
 function getVideoID(name, url) {
   if (url.includes("youtu.be")) {
     let index = 0;
@@ -58,43 +62,34 @@ function getVideoID(name, url) {
 }
 
 module.exports = {
-  addYouTubeVideo(video, provider, roomID, userID) {
+  addYouTubeVideo(video) {
     return new Promise((resolve, reject) => {
-      getYoutubeVideo(video)
+      videos
+        .create(video)
         .then((result) => {
-          let videoInfo = result.data.items[0].snippet;
-          let videoID = result.data.items[0].id;
-
-          let newVideo = {
-            src: videoID,
-            provider: provider,
-            room: roomID,
-            title: videoInfo.title,
-            channel: videoInfo.channelTitle,
-            image: videoInfo.thumbnails.high.url,
-            user: userID,
-          };
-          videos
-            .create(newVideo)
-            .then((result) => {
-              resolve(result);
-            })
-            .catch((error) => {
-              reject(error);
-            });
+          resolve(result);
         })
         .catch((error) => {
           reject(error);
         });
     });
   },
-  searchYoutubeVideo(query) {
+  searchYoutubeVideo(query, provider) {
     return new Promise((resolve, reject) => {
       getYouTubeSearch(query)
         .then((result) => {
-          console.log(result);
           if (result) {
-            resolve(result.data.items);
+            let searchResults = [];
+            result.data.items.forEach((element) => {
+              searchResults.push({
+                src: element.id.videoId,
+                title: element.snippet.title,
+                channel: element.snippet.channelTitle,
+                image: parseImage(element.snippet.thumbnails),
+                provider: provider,
+              });
+            });
+            resolve(searchResults);
           } else {
             reject("error");
           }

@@ -89,46 +89,6 @@ sequelize.sync({ force: false }).then(() => {
         type: 2,
       },
     },
-    {
-      model: "videos",
-      data: {
-        src: "5aJ2QAO9PZo",
-        provider: "youtube",
-        room: 1,
-        title: "I REPLACED my $1000 Wifi....",
-        channel: "Linus Tech Tips",
-        image: "https://via.placeholder.com/150",
-        user: 1,
-        skipCounter: 0,
-      },
-    },
-    {
-      model: "videos",
-      data: {
-        src: "392605479",
-        provider: "vimeo",
-        room: 1,
-        title:
-          "This NEW Troll Level Is the Most BRUTAL One I've Played Yet (Super Mario Maker 2)",
-        channel: "raysfire",
-        image: "https://via.placeholder.com/150",
-        user: 1,
-        skipCounter: 0,
-      },
-    },
-    {
-      model: "videos",
-      data: {
-        src: "Pr1ACPgAhDI",
-        provider: "youtube",
-        room: 1,
-        title: "The most UNDERRATED *NEW* GOLD Weapon in Apex Legends Season 5",
-        channel: "kandyrew",
-        image: "https://via.placeholder.com/150",
-        user: 1,
-        skipCounter: 0,
-      },
-    },
   ];
   sequelize_fixtures.loadFixtures(fixtures, models).then(function () {
     console.log("Sample Data Loaded");
