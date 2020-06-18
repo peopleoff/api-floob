@@ -247,9 +247,10 @@ function voteToSkip(payload, socket) {
 
 // <----------------------------Socket.io Listeners----------------------------> //
 io.on("connection", (socket) => {
-  socket.on("joinedRoom", (payload) => {
+
+  socket.on("enterRoom", (payload) => {
     socket.join(payload.id);
-    newUser(payload, socket);
+    //newUser(payload, socket);
   });
 
   // socket.on("addVideo", (payload) => {

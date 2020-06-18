@@ -135,16 +135,9 @@ module.exports = {
         raw: true,
       })
       .then((room) => {
-        if (req.body.user) {
-          if (room.user === req.body.user.id) {
-            room.roomOwner = true;
-          }
-        }
         return res.status(200).send(room);
       })
       .catch((error) => {
-        console.error("here");
-        console.log(error.message);
         return res.status(401).send({
           type: "error",
           message: error.message,
@@ -293,7 +286,7 @@ module.exports = {
             });
         })
         .catch((error) => {
-          console.error(error)
+          console.error(error);
           return res.send({
             error: true,
             type: "error",

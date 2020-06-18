@@ -3,23 +3,22 @@ const service = google.youtube("v3");
 const { validURL } = require("../functions");
 const { videos } = require("../models");
 
-async function getYoutubeVideo(video) {
-  let isURL = validURL(video);
-  let videoID = null;
-  //If video is full url, parse out the ID
-  if (isURL) {
-    videoID = getVideoID("v", video);
-  } else {
-    videoID = video;
-  }
-
+async function getYoutubeVideoInfo(video) {
+  videoID = getVideoID("v", video.src);
   try {
     let response = await service.videos.list({
       auth: process.env.API_FLOOB_YOUTUBEAPI,
       part: "snippet",
       id: videoID,
     });
-    return response;
+    const apiResponse = response.data.items[0].snippet;
+
+    video.src = videoID;
+    video.channel = apiResponse.channelTitle;
+    video.title = apiResponse.title;
+    video.image = parseImage(apiResponse.thumbnails);
+
+    return video;
   } catch (error) {
     console.error(error);
   }
@@ -62,7 +61,10 @@ function getVideoID(name, url) {
 }
 
 module.exports = {
-  addYouTubeVideo(video) {
+  async addYouTubeVideo(video) {
+    if (validURL(video.src)) {
+      video = await getYoutubeVideoInfo(video);
+    }
     return new Promise((resolve, reject) => {
       videos
         .create(video)

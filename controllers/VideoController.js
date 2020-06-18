@@ -141,23 +141,13 @@ module.exports = {
   ===================================================================
 */
   getVideos(req, res) {
-    videos
-      .findAll({
-        where: {
-          room: req.query.roomID,
-        },
-        include: [
-          {
-            model: users,
-          },
-        ],
-        order: [["createdAt", "ASC"]],
-      })
+    module.exports
+      .getAll(req.query.roomID)
       .then((result) => {
-        return res.send(result);
+        res.status(200).send(result);
       })
       .catch((error) => {
-        return res.send(error);
+        console.error(error);
       });
   },
   postVideo(req, res) {

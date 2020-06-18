@@ -12,9 +12,10 @@ module.exports = (app) => {
     //User's Requests
     app.post('/users/register', UserController.register);
     app.post('/users/login', UserController.login);
+    app.post('/users/getUser', UserController.getUser);
+    app.post('/users/getUsers', UserController.getUsers);
     app.post('/users/requestPasswordChange', UserController.requestPasswordChange);
     app.post('/users/changePassword', UserController.changePassword);
-    app.post('/users/getUsers', UserController.getUsers);
     //Rooms Requests
     app.post('/rooms/getAll', RoomController.getAll);
     app.post('/rooms/register', RoomController.register);
