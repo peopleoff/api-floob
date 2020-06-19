@@ -1,21 +1,11 @@
 const Vimeo = require("vimeo").Vimeo;
 const client = new Vimeo(
   "e16226ab4ea55692b7a9febfd8880cd3bf839573",
-  "/NWeoGWciEsxn+XncuI5KGkTO/OLHl6FFv9d2lNN8SdHlg1y5KTKCNZMFOmaYJ4VmcNlbCuYYKRcTAVDz00iXUjYPDL5T8PGv0LMV8T4gq5wQgSv5vQScoVH33ekhTaj"
+  "/NWeoGWciEsxn+XncuI5KGkTO/OLHl6FFv9d2lNN8SdHlg1y5KTKCNZMFOmaYJ4VmcNlbCuYYKRcTAVDz00iXUjYPDL5T8PGv0LMV8T4gq5wQgSv5vQScoVH33ekhTaj",
+  "dbe0129a89d9a662152cc965a8fea02d"
 );
 const { validURL } = require("../functions");
 const { videos } = require("../models");
-
-let access_token = null;
-
-// `scope` is an array of permissions your token needs to access. You
-// can read more at https://developer.vimeo.com/api/authentication#supported-scopes
-client.generateClientCredentials("public", function (err, response) {
-  if (err) {
-    throw err;
-  }
-  access_token = response.access_token;
-});
 
 function parseVimeoURI(URI) {
   return URI.split("/").pop(-1);
@@ -67,6 +57,7 @@ module.exports = {
                 src: parseVimeoURI(element.uri),
                 title: element.name,
                 channel: element.user.name,
+                channelLink: element.user.link,
                 image: parseImage(element.pictures.sizes),
                 provider: provider,
               });

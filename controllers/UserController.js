@@ -25,6 +25,7 @@ current_viewers.belongsTo(users, {
 });
 
 function getToken(req) {
+  console.log(req.body);
   if (
     req.headers.authorization &&
     req.headers.authorization.split(" ")[0] === "Bearer"
@@ -65,26 +66,25 @@ module.exports = {
             },
           ],
         },
+        raw: true,
       })
       .then((user) => {
         if (user) {
-          return res.send({
-            error: true,
+          return res.status(401).send({
             type: "error",
             message: "User already exsists",
           });
         } else {
           req.body.password = bcrypt.hashSync(req.body.password, salt);
           users.create(req.body).then((response) => {
-            let token = signUser(response);
             let user = {
               id: response.id,
               email: response.email,
               username: response.username,
-              token: token,
             };
+            let token = signUser(user);
             //welcomeEmail(response.email)
-            return res.status(200).send(user);
+            return res.status(200).send({ token });
           });
         }
       })
@@ -137,6 +137,7 @@ module.exports = {
       });
   },
   getUser(req, res) {
+    console.log(req);
     let token = getToken(req);
     if (token) {
       decoded = jwt.verify(token, jwtSecret).user;

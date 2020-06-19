@@ -15,9 +15,9 @@ async function getYoutubeVideoInfo(video) {
 
     video.src = videoID;
     video.channel = apiResponse.channelTitle;
+    video.channelLink = formatChannelLink(apiResponse.channelId);
     video.title = apiResponse.title;
     video.image = parseImage(apiResponse.thumbnails);
-
     return video;
   } catch (error) {
     console.error(error);
@@ -37,6 +37,9 @@ async function getYouTubeSearch(query) {
 function parseImage(imageObject) {
   let objectToArray = Object.values(imageObject);
   return objectToArray[objectToArray.length - 1].url;
+}
+function formatChannelLink(channelID) {
+  return 'https://www.youtube.com/channel/' + channelID;
 }
 function getVideoID(name, url) {
   if (url.includes("youtu.be")) {
@@ -62,6 +65,7 @@ function getVideoID(name, url) {
 
 module.exports = {
   async addYouTubeVideo(video) {
+    //If youtube link is passed, get info from API first
     if (validURL(video.src)) {
       video = await getYoutubeVideoInfo(video);
     }
@@ -87,6 +91,7 @@ module.exports = {
                 src: element.id.videoId,
                 title: element.snippet.title,
                 channel: element.snippet.channelTitle,
+                channelLink: formatChannelLink(element.snippet.channelId),
                 image: parseImage(element.snippet.thumbnails),
                 provider: provider,
               });

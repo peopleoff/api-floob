@@ -20,11 +20,15 @@ module.exports = function(sequelize, DataTypes) {
       },
       title: {
         type: DataTypes.STRING(500),
-        allowNull: false
+        allowNull: true
       },
       channel: {
         type: DataTypes.STRING(500),
-        allowNull: false
+        allowNull: true
+      },
+      channelLink: {
+        type: DataTypes.STRING(500),
+        allowNull: true
       },
       image: {
         type: DataTypes.STRING(500),
