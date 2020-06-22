@@ -1,4 +1,4 @@
-const { users, current_viewers } = require("../models");
+const { users, current_viewers, rooms } = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { signUser } = require("../config/auth");
@@ -24,8 +24,12 @@ current_viewers.belongsTo(users, {
   sourceKey: "id",
 });
 
+users.hasOne(rooms, {
+  foreignKey: "user",
+  as: "userRoom",
+});
+
 function getToken(req) {
-  console.log(req.body);
   if (
     req.headers.authorization &&
     req.headers.authorization.split(" ")[0] === "Bearer"
@@ -108,6 +112,7 @@ module.exports = {
             { username_lowercase: username },
           ],
         },
+        include: [{ model: rooms, as: "userRoom" }],
       })
       .then((response) => {
         if (!response) {
@@ -119,10 +124,12 @@ module.exports = {
         } else {
           let passwordMatch = bcrypt.compareSync(password, response.password);
           if (passwordMatch) {
+            console.log(response);
             let user = {
               id: response.id,
               email: response.email,
               username: response.username,
+              room: response.userRoom.id,
             };
             let token = signUser(user);
             return res.status(200).send({ token });
@@ -137,7 +144,6 @@ module.exports = {
       });
   },
   getUser(req, res) {
-    console.log(req);
     let token = getToken(req);
     if (token) {
       decoded = jwt.verify(token, jwtSecret).user;

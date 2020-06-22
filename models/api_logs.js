@@ -3,20 +3,12 @@ module.exports = function(sequelize, DataTypes) {
     'api_logs',
     {
       user: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TEXT,
         allowNull: true,
-        references: {
-          model: 'users',
-          key: 'id'
-        }
       },
       room: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TEXT,
         allowNull: true,
-        references: {
-          model: 'rooms',
-          key: 'id'
-        }
       },
       service: {
         type: DataTypes.TEXT,
