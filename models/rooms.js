@@ -1,43 +1,49 @@
-var mongoObjectId = function () {
-  var timestamp = (new Date().getTime() / 1000 | 0).toString(16);
-  return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function() {
-      return (Math.random() * 16 | 0).toString(16);
-  }).toLowerCase();
-};
+// import { v5 as uuidv5 } from 'uuid'; // For version 5
+const { v1: uuidv1 } = require("uuid");
 
-module.exports = function(sequelize, DataTypes) {
+function generateRoomID() {
+  let uuid = uuidv1().replace(/[0-9, -]/g, "");
+  let shortUUID = uuid.slice(0, 8);
+  let randomUUID = shortUUID
+    .split("")
+    .map((v) => (Math.round(Math.random()) ? v.toUpperCase() : v.toLowerCase()))
+    .join("");
+  return randomUUID;
+}
+
+module.exports = function (sequelize, DataTypes) {
   const rooms = sequelize.define(
     "rooms",
     {
-      roomID: {
+      roomUUID: {
         type: DataTypes.UUID,
-        defaultValue: mongoObjectId,
-        allowNull: true
+        defaultValue: generateRoomID,
+        allowNull: true,
       },
       name: {
         type: DataTypes.STRING(250),
-        allowNull: false
+        allowNull: false,
       },
       vanityName: {
         type: DataTypes.STRING(250),
-        allowNull: true
+        allowNull: true,
       },
       description: {
         type: DataTypes.STRING(3000),
-        allowNull: true
+        allowNull: true,
       },
       nsfw: {
         type: DataTypes.BOOLEAN,
         defaultValue: 0,
-        allowNull: true
+        allowNull: true,
       },
       user: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
           model: "users",
-          key: "id"
-        }
+          key: "id",
+        },
       },
       type: {
         type: DataTypes.INTEGER,
@@ -45,9 +51,9 @@ module.exports = function(sequelize, DataTypes) {
         defaultValue: 2,
         references: {
           model: "room_types",
-          key: "id"
-        }
-      }
+          key: "id",
+        },
+      },
     },
     {
       tableName: "rooms",

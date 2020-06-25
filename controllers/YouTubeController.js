@@ -26,9 +26,10 @@ async function getYoutubeVideoInfo(video) {
 async function getYouTubeSearch(query) {
   let response = await service.search.list({
     auth: process.env.API_FLOOB_YOUTUBEAPI,
-    part: "snippet",
+    part: 'snippet',
     maxResults: "10",
     type: "video",
+    videoEmbeddable: true,
     q: query,
   });
   return response;
@@ -39,7 +40,7 @@ function parseImage(imageObject) {
   return objectToArray[objectToArray.length - 1].url;
 }
 function formatChannelLink(channelID) {
-  return 'https://www.youtube.com/channel/' + channelID;
+  return "https://www.youtube.com/channel/" + channelID;
 }
 function getVideoID(name, url) {
   if (url.includes("youtu.be")) {
@@ -87,6 +88,7 @@ module.exports = {
           if (result) {
             let searchResults = [];
             result.data.items.forEach((element) => {
+              console.log(element);
               searchResults.push({
                 src: element.id.videoId,
                 title: element.snippet.title,
@@ -94,6 +96,7 @@ module.exports = {
                 channelLink: formatChannelLink(element.snippet.channelId),
                 image: parseImage(element.snippet.thumbnails),
                 provider: provider,
+                publishTime: element.snippet.publishTime,
               });
             });
             resolve(searchResults);

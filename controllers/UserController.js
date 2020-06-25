@@ -52,9 +52,7 @@ function getToken(req) {
 module.exports = {
   register(req, res) {
     if (!req.body) {
-      return res.send({
-        error: true,
-        type: "error",
+      return res.status(401).send({
         message: "No Information submitted",
       });
     }
@@ -75,7 +73,6 @@ module.exports = {
       .then((user) => {
         if (user) {
           return res.status(401).send({
-            type: "error",
             message: "User already exsists",
           });
         } else {
@@ -87,7 +84,9 @@ module.exports = {
               username: response.username,
             };
             let token = signUser(user);
-            //welcomeEmail(response.email)
+            if (process.env.ENV !== "DEVELOPMENT") {
+              welcomeEmail(response.email);
+            }
             return res.status(200).send({ token });
           });
         }
@@ -95,8 +94,6 @@ module.exports = {
       .catch((err) => {
         console.log(err);
         return res.send({
-          error: true,
-          type: "error",
           message: err,
         });
       });
@@ -117,26 +114,22 @@ module.exports = {
       .then((response) => {
         if (!response) {
           return res.send({
-            error: true,
-            type: "error",
             message: "Username or Password is incorrect",
           });
         } else {
           let passwordMatch = bcrypt.compareSync(password, response.password);
           if (passwordMatch) {
-            console.log(response);
             let user = {
               id: response.id,
               email: response.email,
               username: response.username,
-              room: response.userRoom.id,
+              room: response.userRoom.roomUUID,
             };
             let token = signUser(user);
             return res.status(200).send({ token });
           } else {
             return res.send({
               error: true,
-              type: "error",
               message: "Username or Password is incorrect",
             });
           }
@@ -150,19 +143,17 @@ module.exports = {
       return res.status(200).send({ user: decoded });
     } else {
       return res.status(401).send({
-        type: "error",
         message: "Username or Password is incorrect",
       });
     }
   },
-  requestPasswordChange(req, res) {
+  async requestPasswordChange(req, res) {
     if (!req.body.username) {
-      return res.send({
-        error: true,
+      return res.status(401).send({
         message: "Please fill out all fields",
-        type: "error",
       });
     }
+
     let token = jwt.sign(
       {
         username: req.body.username,
@@ -172,59 +163,35 @@ module.exports = {
         expiresIn: "30m",
       }
     );
-    users
-      .update(
-        {
-          reset_token: token,
+    try {
+      let user = await users.findOne({
+        where: {
+          [Op.or]: [
+            { email_lowercase: req.body.username.toLowerCase() },
+            { username_lowercase: req.body.username.toLowerCase() },
+          ],
         },
-        {
-          where: {
-            [Op.or]: [
-              { email_lowercase: req.body.username.toLowerCase() },
-              { username_lowercase: req.body.username.toLowerCase() },
-            ],
-          },
-        }
-      )
-      .then((user) => {
-        //If no user found. Return generic message
-        if (!user[0]) {
-          return res.send({
-            error: false,
-            type: "success",
-            message: "Thank you a password reset has to been sent",
-          });
-        } else {
-          users
-            .findOne({
-              where: {
-                reset_token: token,
-              },
-            })
-            .then((result) => {
-              passwordResetEmail(
-                result.email,
-                result.username,
-                result.reset_token
-              );
-              return res.send({
-                error: false,
-                type: "success",
-                message: "Thank you a password reset has to been sent",
-              });
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        }
-      })
-      .catch((error) => {
-        return res.send({
-          error: true,
-          type: "error",
-          message: error,
-        });
       });
+
+      if (user) {
+        let tokenUpdate = await user.update({
+          reset_token: token,
+        });
+        passwordResetEmail(
+          tokenUpdate.email,
+          tokenUpdate.username,
+          tokenUpdate.reset_token
+        );
+      }
+
+      return res.status(200).send({
+        message: "Thank you a password reset has to been sent",
+      });
+    } catch (error) {
+      return res.status(401).send({
+        message: "Please fill out all fields",
+      });
+    }
   },
   getUsers(req, res) {
     users
@@ -246,15 +213,11 @@ module.exports = {
   changePassword(req, res) {
     if (!req.body) {
       return res.send({
-        error: true,
-        type: "error",
         message: "Please try again",
       });
     }
     if (req.body.password !== req.body.confirmPassword) {
       return res.send({
-        error: true,
-        type: "error",
         message: "Passwords do not match",
       });
     }
@@ -262,8 +225,6 @@ module.exports = {
     jwt.verify(req.body.token, jwtSecret, function (err, decoded) {
       if (!decoded) {
         return res.send({
-          error: true,
-          type: "error",
           message: "Token has expired. Please resend password reset.",
         });
       } else {
@@ -291,14 +252,10 @@ module.exports = {
             //if no user found, return error
             if (!result[0]) {
               return res.send({
-                error: true,
-                type: "error",
                 message: "Error updating password. Please try to reset again.",
               });
             } else {
               return res.send({
-                error: false,
-                type: "success",
                 message: "Password reset. Please login again",
               });
             }

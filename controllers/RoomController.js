@@ -126,11 +126,10 @@ module.exports = {
       });
   },
   getInfo(req, res) {
-    console.log(req.body);
     rooms
       .findOne({
         where: {
-          id: req.body.id,
+          roomUUID: req.body.id,
         },
         raw: true,
       })
@@ -236,63 +235,32 @@ module.exports = {
       });
   },
   async register(req, res) {
-    if (!req.body) {
-      return res.send({
+    if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
+      return res.status(400).send({
         error: true,
         type: "error",
         message: "Error",
       });
     }
     console.log(req.body);
-    //Check if user already has an active room
-    let currentRoom = await rooms.findOne({
-      where: {
-        user: req.body.id,
-      },
-      raw: true,
-    });
-    //Return current room else create a new room
-    if (currentRoom) {
-      return res.send({
-        error: false,
-        room: currentRoom.id,
+    try {
+      let [room] = await rooms.findOrCreate({
+        where: {
+          user: req.body.user,
+        },
+        defaults: {
+          name: randomName(),
+          user: req.body.user,
+        },
       });
-    } else {
-      let newRoom = {
-        name: randomName(),
-        user: req.body.id,
-      };
-      rooms
-        .create(newRoom)
-        .then((response) => {
-          users_rooms
-            .create({
-              user: req.body.id,
-              room: response.id,
-            })
-            .then((createdResponse) => {
-              return res.send({
-                error: false,
-                room: response.id,
-              });
-            })
-            .catch((createdError) => {
-              console.log(createdError);
-              return res.send({
-                error: true,
-                type: "error",
-                message: createdError.errors,
-              });
-            });
-        })
-        .catch((error) => {
-          console.error(error);
-          return res.send({
-            error: true,
-            type: "error",
-            message: error.errors,
-          });
-        });
+      return res.status(200).send({
+        room: room.roomUUID,
+      });
+    } catch (error) {
+      return res.status(500).send({
+        type: "error",
+        message: "Error Creating room, Please try again or Contact Support",
+      });
     }
   },
   toggleRoom(req, res) {

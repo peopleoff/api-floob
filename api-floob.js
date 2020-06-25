@@ -82,7 +82,6 @@ sequelize.sync({ force: false }).then(() => {
     {
       model: "rooms",
       data: {
-        roomID: "5ed5c047125b43cf3ad8c3e1",
         name: "Psycho-Pass Seraph",
         nsfw: 0,
         user: 1,
