@@ -5,6 +5,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const morgan = require("morgan");
+const Autolinker = require("autolinker");
 const allowedOrigins =
   "https://floob.dev:* https://www.floob.dev:* http://localhost:*";
 const { sequelize } = require("./models");
@@ -103,9 +104,11 @@ app.set("io", io);
 
 // <----------------------------Socket Functions----------------------------> //
 function sendMessage(payload) {
+  payload.message = Autolinker.link(payload.message);
   let newMessage = {
     id: guid(),
     username: payload.user.username,
+    color: payload.user.color,
     message: payload.message,
   };
   io.sockets.in(payload.roomID).emit("newMessage", newMessage);
@@ -246,7 +249,6 @@ function voteToSkip(payload, socket) {
 
 // <----------------------------Socket.io Listeners----------------------------> //
 io.on("connection", (socket) => {
-
   socket.on("enterRoom", (payload) => {
     socket.join(payload.id);
     //newUser(payload, socket);

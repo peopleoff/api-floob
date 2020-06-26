@@ -1,6 +1,7 @@
 const { videos, vote_to_skip, rooms, users } = require("../models");
 const { addYouTubeVideo, searchYoutubeVideo } = require("./YouTubeController");
 const { searchVimeoVideo, addVimeoVideo } = require("./VimeoController");
+const { response } = require("express");
 
 videos.hasOne(users, {
   foreignKey: "id",
@@ -30,6 +31,23 @@ module.exports = {
             },
           ],
           order: [["createdAt", "ASC"]],
+        })
+        .then((result) => {
+          resolve(result);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  },
+  getRoomIDFromUUID(roomUUID) {
+    return new Promise((resolve, reject) => {
+      rooms
+        .findOne({
+          where: {
+            roomUUID: roomUUID,
+          },
+          attributes: ["id"],
         })
         .then((result) => {
           resolve(result);
@@ -140,9 +158,16 @@ module.exports = {
   Routes Functions
   ===================================================================
 */
-  getVideos(req, res) {
+  async getVideos(req, res) {
+    let id;
+    id = req.query.roomID;
+    if (!parseInt(req.query.roomID)) {
+      let response = await module.exports.getRoomIDFromUUID(req.query.roomID);
+      id = response.id;
+    }
+
     module.exports
-      .getAll(req.query.roomID)
+      .getAll(id)
       .then((result) => {
         res.status(200).send(result);
       })

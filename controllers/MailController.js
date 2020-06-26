@@ -16,7 +16,7 @@ module.exports = {
       dynamic_template_data: {
         subject: 'Floob Password Reset',
         username: username,
-        reset_link: `https://Floob.gg/passwordReset/${token}`
+        reset_link: `https://Floob.gg/user/change/${token}`
       }
     }
     sgMail

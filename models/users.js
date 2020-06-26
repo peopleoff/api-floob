@@ -1,3 +1,16 @@
+function pickRandomColor() {
+  let colors = [
+    "#2f64EB",
+    "#634FD6",
+    "#00CCC2",
+    "#BB67F5",
+    "#161663"
+  ];
+  var color = colors[Math.floor(Math.random() * colors.length)];
+  return color
+}
+
+
 module.exports = function(sequelize, DataTypes) {
   const users = sequelize.define(
     "users",
@@ -24,7 +37,12 @@ module.exports = function(sequelize, DataTypes) {
       },
       date_of_birth: {
         type: DataTypes.STRING(250),
-        allowNull: false
+        allowNull: true
+      },
+      color: {
+        type: DataTypes.STRING(250),
+        defaultValue: pickRandomColor,
+        allowNull: true
       },
       type: {
         type: DataTypes.INTEGER(11),

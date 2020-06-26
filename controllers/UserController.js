@@ -40,6 +40,9 @@ function getToken(req) {
   } else if (req.query && req.query.token) {
     // Handle token presented as URI param
     return req.query.token;
+  } else if (req.body && req.body.token) {
+    // Handle token presented as a cookie parameter
+    return req.body.token;
   } else if (req.cookies && req.cookies.token) {
     // Handle token presented as a cookie parameter
     return req.cookies.token;
@@ -92,7 +95,6 @@ module.exports = {
         }
       })
       .catch((err) => {
-        console.log(err);
         return res.send({
           message: err,
         });
@@ -123,12 +125,13 @@ module.exports = {
               id: response.id,
               email: response.email,
               username: response.username,
+              color: response.color,
               room: response.userRoom.roomUUID,
             };
             let token = signUser(user);
             return res.status(200).send({ token });
           } else {
-            return res.send({
+            return res.status(401).send({
               error: true,
               message: "Username or Password is incorrect",
             });
@@ -139,31 +142,31 @@ module.exports = {
   getUser(req, res) {
     let token = getToken(req);
     if (token) {
-      decoded = jwt.verify(token, jwtSecret).user;
-      return res.status(200).send({ user: decoded });
+      try {
+        decoded = jwt.verify(token, jwtSecret).user;
+        return res.status(200).send({ user: decoded });
+      } catch (error) {
+        return res.status(401).send({
+          message:
+            "Reset time has expired, please request a new password reset",
+        });
+      }
     } else {
+      console.log("here?");
       return res.status(401).send({
         message: "Username or Password is incorrect",
       });
     }
   },
   async requestPasswordChange(req, res) {
+    //Return error if no username is entered
     if (!req.body.username) {
       return res.status(401).send({
         message: "Please fill out all fields",
       });
     }
-
-    let token = jwt.sign(
-      {
-        username: req.body.username,
-      },
-      jwtSecret,
-      {
-        expiresIn: "30m",
-      }
-    );
     try {
+      //Look for either username or email provided
       let user = await users.findOne({
         where: {
           [Op.or]: [
@@ -173,7 +176,21 @@ module.exports = {
         },
       });
 
+      //If user exsists update record with token and send reset email
       if (user) {
+        let resetToken = {
+          id: user.id,
+          username: user.email,
+        };
+        let token = jwt.sign(
+          {
+            user: resetToken,
+          },
+          jwtSecret,
+          {
+            expiresIn: "30m",
+          }
+        );
         let tokenUpdate = await user.update({
           reset_token: token,
         });
@@ -184,6 +201,7 @@ module.exports = {
         );
       }
 
+      //Return success message to user
       return res.status(200).send({
         message: "Thank you a password reset has to been sent",
       });
@@ -212,58 +230,51 @@ module.exports = {
   },
   changePassword(req, res) {
     if (!req.body) {
-      return res.send({
+      return res.statsu(401).send({
         message: "Please try again",
       });
     }
     if (req.body.password !== req.body.confirmPassword) {
-      return res.send({
+      return res.statsu(401).send({
         message: "Passwords do not match",
       });
     }
-    //Decode token to get email
-    jwt.verify(req.body.token, jwtSecret, function (err, decoded) {
-      if (!decoded) {
-        return res.send({
-          message: "Token has expired. Please resend password reset.",
-        });
-      } else {
-        let newPassword = bcrypt.hashSync(req.body.password, salt);
-        users
-          .update(
-            {
-              password: newPassword,
+    try {
+      decoded = jwt.verify(req.body.token, jwtSecret).user;
+      let newPassword = bcrypt.hashSync(req.body.password, salt);
+      users
+        .update(
+          {
+            password: newPassword,
+          },
+          {
+            where: {
+              id: decoded.id,
+              reset_token: req.body.token,
             },
-            {
-              where: {
-                [Op.or]: [
-                  {
-                    username_lowercase: decoded.username.toLowerCase(),
-                  },
-                  {
-                    email_lowercase: decoded.username.toLowerCase(),
-                  },
-                ],
-                reset_token: req.body.token,
-              },
-            }
-          )
-          .then((result) => {
-            //if no user found, return error
-            if (!result[0]) {
-              return res.send({
-                message: "Error updating password. Please try to reset again.",
-              });
-            } else {
-              return res.send({
-                message: "Password reset. Please login again",
-              });
-            }
-          })
-          .catch((error) => {
-            console.error(error);
+          }
+        )
+        .then((result) => {
+          //if no user found, return error
+          if (!result[0]) {
+            return res.status(401).send({
+              message: "Error updating password. Please try to reset again.",
+            });
+          } else {
+            return res.status(200).send({
+              message: "Password reset. Please login again",
+            });
+          }
+        })
+        .catch((error) => {
+          return res.status(401).send({
+            message: "Error updating password. Please try to reset again.",
           });
-      }
-    });
+        });
+    } catch (error) {
+      return res.status(401).send({
+        message: "Reset time has expired, please request a new password reset",
+      });
+    }
   },
 };

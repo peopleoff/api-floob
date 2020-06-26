@@ -88,7 +88,6 @@ module.exports = {
           if (result) {
             let searchResults = [];
             result.data.items.forEach((element) => {
-              console.log(element);
               searchResults.push({
                 src: element.id.videoId,
                 title: element.snippet.title,
