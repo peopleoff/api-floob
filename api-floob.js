@@ -160,6 +160,14 @@ function syncVideo(payload, socket) {
   io.sockets.in(payload.roomID).emit("syncVideo", payload.seconds);
 }
 
+function playVideo(roomID) {
+  io.sockets.in(roomID).emit("playVideo");
+}
+
+function pauseVideo(roomID) {
+  io.sockets.in(roomID).emit("pauseVideo");
+}
+
 // function addVideo(payload, socket) {
 //   VideoController.addVideo(payload)
 //     .then((result) => {
@@ -278,6 +286,13 @@ io.on("connection", (socket) => {
   socket.on("seekVideo", (payload) => {
     syncVideo(payload, socket);
   });
+  socket.on("playVideo", (roomID) => {
+    playVideo(roomID);
+  });
+  socket.on("pauseVideo", (roomID) => {
+    pauseVideo(roomID);
+  });
+
   socket.on("leaveRoom", (socketID) => {
     // RoomController.removeFromRoom(socketID);
   });
