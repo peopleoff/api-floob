@@ -156,8 +156,12 @@ function removeFromRoom(payload, socket) {
   // })
 }
 
-function syncVideo(payload, socket) {
-  io.sockets.in(payload.roomID).emit("syncVideo", payload.seconds);
+function syncVideo(payload) {
+  console.log(payload);
+  io.sockets.in(payload.roomID).emit("syncVideo", {
+    seconds: payload.seconds,
+    playerID: payload.playerID,
+  });
 }
 
 function playVideo(roomID) {
