@@ -167,6 +167,9 @@ function syncVideo(payload) {
 function playVideo(roomID) {
   io.sockets.in(roomID).emit("playVideo");
 }
+function playSpeed(payload) {
+  io.sockets.in(payload.roomID).emit("playSpeed", payload);
+}
 
 function pauseVideo(roomID) {
   io.sockets.in(roomID).emit("pauseVideo");
@@ -287,8 +290,11 @@ io.on("connection", (socket) => {
   socket.on("searchVideos", (payload) => {
     searchVideos(payload, socket);
   });
-  socket.on("seekVideo", (payload) => {
+  socket.on("syncVideo", (payload) => {
     syncVideo(payload, socket);
+  });
+  socket.on("playSpeed", (payload) => {
+    playSpeed(payload, socket);
   });
   socket.on("playVideo", (roomID) => {
     playVideo(roomID);
