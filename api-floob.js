@@ -157,7 +157,6 @@ function removeFromRoom(payload, socket) {
 }
 
 function syncVideo(payload) {
-  console.log(payload);
   io.sockets.in(payload.roomID).emit("syncVideo", {
     seconds: payload.seconds,
     playerID: payload.playerID,
@@ -197,7 +196,6 @@ function pauseVideo(roomID) {
 // }
 
 function removeVideo(payload, socket) {
-  console.log(payload);
   VideoController.removeVideo(payload.id)
     .then((result) => {
       if (result) {
