@@ -103,12 +103,6 @@ module.exports = {
       },
     });
 
-    let roomOwner = await rooms.findOne({
-      where: {
-        id: payload.room,
-        user: payload.user,
-      },
-    });
     //Check if user has already skipped video
     let userVoted = await vote_to_skip.findOrCreate({
       defaults: payload,
@@ -248,6 +242,26 @@ module.exports = {
       default:
         break;
     }
+  },
+  async voteToSkip(req, res) {
+    let io = req.app.get("io");
+    // console.log(req.body);
+    // const {videoID, userID, roomID} = req.body;
+    // console.log(roomID);
+    // let roomCount = io.sockets.in(roomID).connected
+
+
+    // console.log(roomCount);
+
+    // let videoOwner = await videos.findOne({
+    //   where: {
+    //     id: videoID,
+    //     user: userID,
+    //   },
+    // });
+    // if(videoOwner){
+
+    // }
   },
   /*
   ===================================================================

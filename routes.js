@@ -9,6 +9,7 @@ module.exports = (app) => {
     // // Post Requests
     app.post('/videos/postVideo', VideoController.postVideo);
     app.post('/videos/search', VideoController.searchVideos);
+    app.post('/videos/voteToSkip', VideoController.voteToSkip);
     //User's Requests
     app.post('/users/register', UserController.register);
     app.post('/users/login', UserController.login);

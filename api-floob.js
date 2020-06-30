@@ -105,14 +105,24 @@ app.set("io", io);
 // <----------------------------Socket Functions----------------------------> //
 function sendMessage(payload) {
   payload.message = Autolinker.link(payload.message);
+  if(!payload.user){
+    payload.user = {
+      username: "someone",
+      color: "#fff"
+    }
+  }
   let newMessage = {
     id: guid(),
+    eventMessage: payload.eventMessage,
     username: payload.user.username,
     color: payload.user.color,
     message: payload.message,
+    timestamp: new Date()
   };
   io.sockets.in(payload.roomID).emit("newMessage", newMessage);
-  MessageController.saveMessage(payload);
+  if(!payload.eventMessage){
+    MessageController.saveMessage(payload);
+  }
 }
 
 function searchVideos(payload, socket) {
@@ -222,8 +232,10 @@ function voteToSkip(payload, socket) {
     room: room,
     video: video,
   };
+
   let roomCount = io.nsps["/"].adapter.rooms[payload.roomID];
   let votesNeeded = roomCount.length / 2;
+
   VideoController.voteToSkip(skipObject, votesNeeded)
     .then((result) => {
       //If vote passed, skip video
@@ -242,7 +254,7 @@ function voteToSkip(payload, socket) {
               .then((videoResult) => {
                 io.sockets.in(room).emit("getVideos", videoResult);
               })
-              .catch((error) => {
+              .catch((error) => { 
                 console.error(error);
               });
           })
@@ -264,6 +276,7 @@ function voteToSkip(payload, socket) {
 io.on("connection", (socket) => {
   socket.on("enterRoom", (payload) => {
     socket.join(payload.id);
+    socket.username = "test";
     //newUser(payload, socket);
   });
 
