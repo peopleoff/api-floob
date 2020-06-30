@@ -14,7 +14,10 @@ const VideoController = require("./controllers/VideoController");
 const RoomController = require("./controllers/RoomController");
 const MessageController = require("./controllers/MessageController");
 
-// Sentry.init({ dsn: 'https://7580653f7aa84fd1ad0d27fb2569c691@o330708.ingest.sentry.io/5260940' });
+
+if(process.env.ENABLE_LOGGING == "true"){
+  Sentry.init({ dsn: 'https://7580653f7aa84fd1ad0d27fb2569c691@o330708.ingest.sentry.io/5260940' });
+}
 
 app.use(Sentry.Handlers.requestHandler());
 app.use(morgan("combined"));
@@ -23,7 +26,10 @@ app.use(cors());
 
 require("./routes")(app);
 
-// app.use(Sentry.Handlers.errorHandler());
+if(process.env.ENABLE_LOGGING == "true"){
+  app.use(Sentry.Handlers.errorHandler());
+}
+
 
 const server = app.listen(process.env.PORT, function () {
   console.log(`server running on port ${process.env.PORT}`);
