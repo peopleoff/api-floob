@@ -85,6 +85,7 @@ module.exports = {
               id: response.id,
               email: response.email,
               username: response.username,
+              color: response.color
             };
             let token = signUser(user);
             if (process.env.ENV !== "DEVELOPMENT") {

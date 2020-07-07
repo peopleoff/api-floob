@@ -14,9 +14,11 @@ const VideoController = require("./controllers/VideoController");
 const RoomController = require("./controllers/RoomController");
 const MessageController = require("./controllers/MessageController");
 
-
-if(process.env.ENABLE_LOGGING == "true"){
-  Sentry.init({ dsn: 'https://7580653f7aa84fd1ad0d27fb2569c691@o330708.ingest.sentry.io/5260940' });
+if (process.env.ENABLE_LOGGING == "true") {
+  Sentry.init({
+    dsn:
+      "https://7580653f7aa84fd1ad0d27fb2569c691@o330708.ingest.sentry.io/5260940",
+  });
 }
 
 app.use(Sentry.Handlers.requestHandler());
@@ -26,10 +28,9 @@ app.use(cors());
 
 require("./routes")(app);
 
-if(process.env.ENABLE_LOGGING == "true"){
+if (process.env.ENABLE_LOGGING == "true") {
   app.use(Sentry.Handlers.errorHandler());
 }
-
 
 const server = app.listen(process.env.PORT, function () {
   console.log(`server running on port ${process.env.PORT}`);
@@ -111,11 +112,11 @@ app.set("io", io);
 // <----------------------------Socket Functions----------------------------> //
 function sendMessage(payload) {
   payload.message = Autolinker.link(payload.message);
-  if(!payload.user){
+  if (!payload.user) {
     payload.user = {
       username: "someone",
-      color: "#fff"
-    }
+      color: "#fff",
+    };
   }
   let newMessage = {
     id: guid(),
@@ -123,10 +124,10 @@ function sendMessage(payload) {
     username: payload.user.username,
     color: payload.user.color,
     message: payload.message,
-    timestamp: new Date()
+    timestamp: new Date(),
   };
   io.sockets.in(payload.roomID).emit("newMessage", newMessage);
-  if(!payload.eventMessage){
+  if (!payload.eventMessage) {
     MessageController.saveMessage(payload);
   }
 }
@@ -179,15 +180,20 @@ function syncVideo(payload) {
   });
 }
 
-function playVideo(roomID) {
-  io.sockets.in(roomID).emit("playVideo");
-}
-function playSpeed(payload) {
-  io.sockets.in(payload.roomID).emit("playSpeed", payload);
+function playVideo(payload) {
+  io.sockets.in(payload.roomID).emit("playVideo", {
+    playerID: payload.playerID,
+  });
 }
 
-function pauseVideo(roomID) {
-  io.sockets.in(roomID).emit("pauseVideo");
+function pauseVideo(payload) {
+  io.sockets.in(payload.roomID).emit("pauseVideo", {
+    playerID: payload.playerID,
+  });
+}
+
+function playSpeed(payload) {
+  io.sockets.in(payload.roomID).emit("playSpeed", payload);
 }
 
 // function addVideo(payload, socket) {
@@ -260,7 +266,7 @@ function voteToSkip(payload, socket) {
               .then((videoResult) => {
                 io.sockets.in(room).emit("getVideos", videoResult);
               })
-              .catch((error) => { 
+              .catch((error) => {
                 console.error(error);
               });
           })
@@ -295,34 +301,43 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", (payload) => {
     sendMessage(payload, socket);
   });
+
   socket.on("voteToSkip", (payload) => {
     voteToSkip(payload, socket);
   });
+
   socket.on("removeFromRoom", (payload) => {
     removeFromRoom(payload, socket);
   });
+
   socket.on("removeVideo", (payload) => {
     removeVideo(payload, socket);
   });
+
   socket.on("searchVideos", (payload) => {
     searchVideos(payload, socket);
   });
+
   socket.on("syncVideo", (payload) => {
     syncVideo(payload, socket);
   });
+
   socket.on("playSpeed", (payload) => {
     playSpeed(payload, socket);
   });
-  socket.on("playVideo", (roomID) => {
-    playVideo(roomID);
+
+  socket.on("playVideo", (payload) => {
+    playVideo(payload);
   });
-  socket.on("pauseVideo", (roomID) => {
-    pauseVideo(roomID);
+
+  socket.on("pauseVideo", (payload) => {
+    pauseVideo(payload);
   });
 
   socket.on("leaveRoom", (socketID) => {
     // RoomController.removeFromRoom(socketID);
   });
+
   socket.on("disconnect", () => {
     RoomController.removeFromRoom(null, socket.id);
   });

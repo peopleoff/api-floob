@@ -27,7 +27,7 @@ async function getYouTubeSearch(query) {
   let response = await service.search.list({
     auth: process.env.API_FLOOB_YOUTUBEAPI,
     part: 'snippet',
-    maxResults: "10",
+    maxResults: "5",
     type: "video",
     videoEmbeddable: true,
     q: query,

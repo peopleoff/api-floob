@@ -38,7 +38,7 @@ module.exports = {
           query: {
             query: query,
             page: 1,
-            per_page: 10,
+            per_page: 5,
             fields:
               "uri,name,user.name,user.link,description,content_rating,pictures",
           },
