@@ -2,6 +2,7 @@ const { videos, vote_to_skip, rooms, users } = require("../models");
 const { addYouTubeVideo, searchYoutubeVideo } = require("./YouTubeController");
 const { searchVimeoVideo, addVimeoVideo } = require("./VimeoController");
 const { response } = require("express");
+const e = require("express");
 
 videos.hasOne(users, {
   foreignKey: "id",
@@ -176,17 +177,7 @@ module.exports = {
       case 1:
         console.log("Youtube");
         addYouTubeVideo(req.body)
-          .then((result) => {
-            module.exports
-              .getAll(req.body.room)
-              .then((result) => {
-                io.sockets.in(req.body.room).emit("getVideos", result);
-                res.status(200).send(result);
-              })
-              .catch((error) => {
-                console.error(error);
-              });
-          })
+          .then((result) => {})
           .catch((error) => {
             console.error(error);
           });
@@ -243,13 +234,36 @@ module.exports = {
         break;
     }
   },
-  async voteToSkip(req, res) {
+  async skipVideo(req, res) {
     let io = req.app.get("io");
-    // console.log(req.body);
-    // const {videoID, userID, roomID} = req.body;
-    // console.log(roomID);
+    const { videoID, userID, roomID } = req.body;
     // let roomCount = io.sockets.in(roomID).connected
 
+    let deleted = await videos.destroy({
+      where: {
+        id: videoID,
+      },
+    });
+
+    if (deleted === 1) {
+      module.exports
+        .getAll(roomID)
+        .then((result) => {
+          io.sockets.in(roomID).emit("getVideos", result);
+          res.status(200).send({
+            message: "Video Skipped",
+          });
+        })
+        .catch((error) => {
+          res.status(500).send({
+            message: error,
+          });
+        });
+    } else {
+      res.status(200).send({
+        message: "Video has already ended",
+      });
+    }
 
     // console.log(roomCount);
 
