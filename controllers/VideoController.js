@@ -177,7 +177,17 @@ module.exports = {
       case 1:
         console.log("Youtube");
         addYouTubeVideo(req.body)
-          .then((result) => {})
+          .then((result) => {
+            module.exports
+              .getAll(req.body.room)
+              .then((result) => {
+                io.sockets.in(req.body.room).emit("getVideos", result);
+                res.status(200).send(result);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          })
           .catch((error) => {
             console.error(error);
           });
