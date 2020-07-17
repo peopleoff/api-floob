@@ -7,6 +7,26 @@ const client = new Vimeo(
 const { validURL } = require("../functions");
 const { videos } = require("../models");
 
+async function getVimeoVideoInfo(video) {
+  let videoID = video.src.split("/")[video.src.split("/").length - 1];
+  return new Promise((resolve, reject) => {
+    client.request(
+      {
+        method: "GET",
+        path: "/videos/" + videoID,
+      },
+      function (error, body, status_code, headers) {
+        video.src = videoID;
+        video.channel = body.user.name;
+        video.channelLink = body.link;
+        video.title = body.name;
+        video.image = parseImage(body.pictures.sizes);
+        resolve(video);
+      }
+    );
+  });
+}
+
 function parseVimeoURI(URI) {
   return URI.split("/").pop(-1);
 }
@@ -16,9 +36,12 @@ function parseImage(imageArray) {
 }
 
 module.exports = {
-  addVimeoVideo(video) {
+  async addVimeoVideo(video) {
+    //If youtube link is passed, get info from API first
+    if (validURL(video.src)) {
+      video = await getVimeoVideoInfo(video);
+    }
     return new Promise((resolve, reject) => {
-      console.log(video);
       videos
         .create(video)
         .then((result) => {
@@ -45,12 +68,8 @@ module.exports = {
         },
         function (error, body, status_code, headers) {
           if (error) {
-            console.log("error");
-            console.log(error);
             reject(error);
           } else {
-            console.log("body");
-            console.log(body);
             let searchResults = [];
             body.data.forEach((element) => {
               searchResults.push({
