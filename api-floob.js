@@ -7,7 +7,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const Autolinker = require("autolinker");
 const allowedOrigins =
-  "https://floob.dev:* https://www.floob.dev:* http://localhost:*";
+  "https://floob.gg:* https://www.floob.gg:* http://localhost:*";
 const { sequelize } = require("./models");
 const { catchError, videoSearch, guid } = require("./functions");
 const VideoController = require("./controllers/VideoController");
