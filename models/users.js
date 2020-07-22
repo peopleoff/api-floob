@@ -64,6 +64,14 @@ module.exports = function(sequelize, DataTypes) {
       reset_token: {
         type: DataTypes.STRING(250),
         allowNull: true
+      },
+      tracking_source: {
+        type: DataTypes.STRING(500),
+        allowNull: true
+      },
+      tracking_id: {
+        type: DataTypes.STRING(500),
+        allowNull: true
       }
     },
     {

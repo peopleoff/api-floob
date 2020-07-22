@@ -140,19 +140,15 @@ function searchVideos(payload, socket) {
   });
 }
 
-function newUser(payload, socket) {
-  const { id } = payload;
-  VideoController.getAll(id)
-    .then((result) => {
-      socket.emit("getVideos", result);
-    })
-    .catch((error) => {
-      catchError(error);
-    });
-  // RoomController.addToRoom(payload, socket.id)
-  // RoomController.getCurrentViewers(payload).then(result => {
-  //   io.sockets.in(payload.roomID).emit('userCount', result)
-  // })
+function enterRoom(payload, socket) {
+  socket.join(payload.id);
+  socket.username = payload.user.username;
+  console.log(socket.rooms);
+  console.log(payload);
+  // io.sockets.in(payload.id).emit("userJoined", {
+  //   username: socket.username,
+  //   numUsers: numUsers,
+  // });
 }
 
 // function getCurrentViewers(payload, socket) {
@@ -287,9 +283,7 @@ function voteToSkip(payload, socket) {
 // <----------------------------Socket.io Listeners----------------------------> //
 io.on("connection", (socket) => {
   socket.on("enterRoom", (payload) => {
-    socket.join(payload.id);
-    socket.username = "test";
-    //newUser(payload, socket);
+    enterRoom(payload, socket);
   });
 
   // socket.on("addVideo", (payload) => {
