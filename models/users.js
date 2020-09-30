@@ -65,14 +65,18 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.STRING(250),
         allowNull: true
       },
+      tracking_id: {
+        type: DataTypes.STRING(500),
+        allowNull: true
+      },
       tracking_source: {
         type: DataTypes.STRING(500),
         allowNull: true
       },
-      tracking_id: {
+      tracking_sub_source: {
         type: DataTypes.STRING(500),
         allowNull: true
-      }
+      },
     },
     {
       tableName: "users",

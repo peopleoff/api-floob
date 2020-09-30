@@ -9,7 +9,7 @@ module.exports = {
         email: recipient
       },
       from: {
-        name: 'Support Floob',
+        name: 'Floob',
         email: 'Support@floob.gg'
       },
       templateId: 'd-b7270eebc96d434baec84070b4af7c43',
@@ -34,7 +34,7 @@ module.exports = {
         email: recipient
       },
       from: {
-        name: 'Support Floob',
+        name: 'Floob',
         email: 'Support@floob.gg'
       },
       templateId: 'd-c30d2b4f5aeb47c49626629dc0d96a94',
