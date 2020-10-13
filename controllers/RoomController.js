@@ -129,7 +129,7 @@ module.exports = {
     rooms
       .findOne({
         where: {
-          roomUUID: req.body.id,
+          room_uuid: req.body.id,
         },
         raw: true,
       })
@@ -148,7 +148,7 @@ module.exports = {
       current_viewers
         .findAndCountAll({
           where: {
-            room: payload.roomID,
+            room: payload.room_id,
           },
         })
         .then((result) => {
@@ -167,7 +167,7 @@ module.exports = {
 
     let newUser = {
       user: userID,
-      room: payload.roomID,
+      room: payload.room_id,
       socketID: socketID,
     };
     current_viewers
@@ -180,18 +180,18 @@ module.exports = {
       });
   },
   removeFromRoom(payload, socketID) {
-    let roomID;
+    let room_id;
     if (!payload) {
-      roomID = "";
+      room_id = "";
     } else {
-      roomID = payload.roomID;
+      room_id = payload.room_id;
     }
     current_viewers.destroy({
       where: {
         [Op.or]: [
           {
             socketID: socketID,
-            room: roomID,
+            room: room_id,
           },
           {
             socketID: socketID,
@@ -242,7 +242,7 @@ module.exports = {
         message: "Error",
       });
     }
-    console.log(req.body);
+    
     try {
       let [room] = await rooms.findOrCreate({
         where: {
@@ -254,9 +254,10 @@ module.exports = {
         },
       });
       return res.status(200).send({
-        room: room.roomUUID,
+        room: room.room_uuid,
       });
     } catch (error) {
+      console.log(error);
       return res.status(500).send({
         type: "error",
         message: "Error Creating room, Please try again or Contact Support",

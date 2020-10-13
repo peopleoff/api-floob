@@ -3,8 +3,10 @@ const MessageController = require("./controllers/MessageController");
 const Autolinker = require("autolinker");
 //Classes
 const { Users } = require("./classes/users");
+const { Rooms } = require("./classes/rooms");
 
 let users = new Users();
+let rooms = new Rooms();
 
 //Functions
 const { guid } = require("./functions");
@@ -26,7 +28,7 @@ exports = module.exports = function (io) {
    * Sends a chat message
    * @param {Object} payload - The employee who is responsible for the project.
    * @param {string} payload.message - The chat message.
-   * @param {number} payload.roomID - The ID of the room
+   * @param {number} payload.room_id - The ID of the room
    * @param {number} payload.user - The ID of the user sending the message
    */
   function sendMessage(payload) {
@@ -45,7 +47,7 @@ exports = module.exports = function (io) {
       message: payload.message,
       timestamp: new Date(),
     };
-    io.sockets.in(payload.roomID).emit("newMessage", newMessage);
+    io.sockets.in(payload.room_id).emit("newMessage", newMessage);
     if (!payload.eventMessage) {
       MessageController.saveMessage(payload);
     }
@@ -62,40 +64,50 @@ exports = module.exports = function (io) {
   function sendHeartbeat() {
     //Send request for all users to update current timestamp
     getUserVideoPercent();
-    let rooms = users.getRooms();
-    rooms.forEach((room) => {
-      let highestCurrentTime = users.getHighestCurrentTime(room);
-      io.to(room).emit("syncToHighestCurrentTime", highestCurrentTime);
+    let allRooms = rooms.getAllRooms();
+    allRooms.forEach((room) => {
+      // let highestCurrentTime = users.getHighestCurrentTime(room);
+      console.log(room);
+      io.to(room.room_id).emit("heartbeat", room);
     });
   }
   /**
    * Registers the user to a specific room
    * @param {Object} payload - The employee who is responsible for the project.
-   * @param {number} payload.id - The ID of the room
+   * @param {Object} payload.room - The ID of the room
    * @param {Object} payload.user - The user entering the room
    * @param {socket} socket - Socket.io socket object
    */
   function enterRoom(payload, socket) {
     //Join user to socket room based on room ID
-    socket.join(payload.id);
+    const { room, user } = payload;
+    
+    socket.join(room.id);
 
     //If user is not logged in, generate random temp user
-    if (!payload.user) {
-      payload.user = users.createTempUser(payload.id);
+    if (!user) {
+      user = users.createTempUser(room.id);
     }
 
-    //Remove users from all rooms they might already be in
-    users.removeUser(payload.id);
-    //Add user to current room they are entering
-    users.addUser(socket.id, payload.id, payload.user);
-    //Send updated user list to room
-    io.sockets
-      .in(payload.id)
-      .emit("updateUserList", users.getUserList(payload.id));
+    //Remove user from any old rooms
+    //TO-DO Remove user from all rooms
+    // rooms.removeUser(payload.user)
+
+    //Find if room is already created
+    let findRoom = rooms.getRoom(room.id);
+
+    //If room is not created yet, create room then add user
+    //Else just add user to room
+    if (!findRoom) {
+      rooms.addRoom(room.id, room.room_uuid);
+      rooms.addUser(room.id, user);
+    } else {
+      rooms.addUser(room.id, user);
+    }
 
     //Emit to everyone but user who entertred that someone has joined
-    socket.to(payload.id).emit("userJoined", {
-      username: payload.user.username,
+    socket.to(room.id).emit("userJoined", {
+      username: user.username,
     });
   }
   /**
@@ -114,69 +126,69 @@ exports = module.exports = function (io) {
   /**
    * Sends a socket event to sync everyone in a room
    * @param {Object} payload - The employee who is responsible for the project.
-   * @param {number} payload.playerID - The HTML ID of the users video player
-   * @param {number} payload.roomID - The ID of the room
+   * @param {number} payload.player_id - The HTML ID of the users video player
+   * @param {number} payload.room_id - The ID of the room
    * @param {number} payload.seconds - The current timestamp in seconds of the users video
    * @param {socket} socket - Socket.io socket object
    */
   function syncVideo(payload, socket) {
-    socket.to(payload.roomID).emit("syncVideo", {
+    socket.to(payload.room_id).emit("syncVideo", {
       seconds: payload.seconds,
-      playerID: payload.playerID,
+      player_id: payload.player_id,
     });
   }
   /**
    * Sends a socket event to play(unpause) the video
    * @param {Object} payload - The employee who is responsible for the project.
-   * @param {number} payload.playerID - The HTML ID of the users video player
-   * @param {number} payload.roomID - The ID of the room
+   * @param {number} payload.player_id - The HTML ID of the users video player
+   * @param {number} payload.room_id - The ID of the room
    * @param {number} payload.seconds - The current timestamp in seconds of the users video
    * @param {socket} socket - Socket.io socket object
    */
   function playVideo(payload, socket) {
-    socket.to(payload.roomID).emit("playVideo", {
-      playerID: payload.playerID,
+    socket.to(payload.room_id).emit("playVideo", {
+      player_id: payload.player_id,
     });
   }
   /**
    * Sends a socket event to pause the video
    * @param {Object} payload - The employee who is responsible for the project.
-   * @param {number} payload.playerID - The HTML ID of the users video player
-   * @param {number} payload.roomID - The ID of the room
+   * @param {number} payload.player_id - The HTML ID of the users video player
+   * @param {number} payload.room_id - The ID of the room
    * @param {number} payload.seconds - The current timestamp in seconds of the users video
    * @param {socket} socket - Socket.io socket object
    */
   function pauseVideo(payload, socket) {
-    socket.to(payload.roomID).emit("pauseVideo", {
-      playerID: payload.playerID,
+    socket.to(payload.room_id).emit("pauseVideo", {
+      player_id: payload.player_id,
     });
   }
   /**
    * Sends a socket event to get current percent of playing video per user.
    * @param {Object} payload - The employee who is responsible for the project.
-   * @param {number} payload.playerID - The HTML ID of the users video player
-   * @param {number} payload.roomID - The ID of the room
+   * @param {number} payload.player_id - The HTML ID of the users video player
+   * @param {number} payload.room_id - The ID of the room
    * @param {number} payload.currentTime - The current percent of the users video
    * @param {number} payload.duration - The current percent of the users video
    * @param {socket} socket - Socket.io socket object
    */
   function updateVideo(payload, socket) {
     users.updateUserVideoTimestamp(payload, socket.id);
-    io.to(payload.roomID).emit(
+    io.to(payload.room_id).emit(
       "updateUserList",
-      users.getUserList(payload.roomID)
+      users.getUserList(payload.room_id)
     );
   }
   /**
    * Sends a socket event to set player speed
    * @param {Object} payload - The employee who is responsible for the project.
-   * @param {number} payload.playerID - The HTML ID of the users video player
-   * @param {number} payload.roomID - The ID of the room
+   * @param {number} payload.player_id - The HTML ID of the users video player
+   * @param {number} payload.room_id - The ID of the room
    * @param {number} payload.speed - The current speed of the users video
    * @param {socket} socket - Socket.io socket object
    */
   function playSpeed(payload, socket) {
-    socket.to(payload.roomID).emit("playSpeed", payload);
+    socket.to(payload.room_id).emit("playSpeed", payload);
   }
   /**
    * Needs more documentation

@@ -41,12 +41,12 @@ module.exports = {
         });
     });
   },
-  getRoomIDFromUUID(roomUUID) {
+  getRoomIDFromUUID(room_uuid) {
     return new Promise((resolve, reject) => {
       rooms
         .findOne({
           where: {
-            roomUUID: roomUUID,
+            room_uuid: room_uuid,
           },
           attributes: ["id"],
         })
@@ -155,9 +155,9 @@ module.exports = {
 */
   async getVideos(req, res) {
     let id;
-    id = req.query.roomID;
-    if (!parseInt(req.query.roomID)) {
-      let response = await module.exports.getRoomIDFromUUID(req.query.roomID);
+    id = req.query.room_id;
+    if (!parseInt(req.query.room_id)) {
+      let response = await module.exports.getRoomIDFromUUID(req.query.room_id);
       id = response.id;
     }
 
@@ -246,8 +246,8 @@ module.exports = {
   },
   async skipVideo(req, res) {
     let io = req.app.get("io");
-    const { videoID, userID, roomID } = req.body;
-    // let roomCount = io.sockets.in(roomID).connected
+    const { videoID, userID, room_id } = req.body;
+    // let roomCount = io.sockets.in(room_id).connected
 
     let deleted = await videos.destroy({
       where: {
@@ -257,9 +257,9 @@ module.exports = {
 
     if (deleted === 1) {
       module.exports
-        .getAll(roomID)
+        .getAll(room_id)
         .then((result) => {
-          io.sockets.in(roomID).emit("getVideos", result);
+          io.sockets.in(room_id).emit("getVideos", result);
           res.status(200).send({
             message: "Video Skipped",
           });

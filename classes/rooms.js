@@ -3,51 +3,64 @@ class Rooms {
     this.rooms = [];
   }
 
-  addRoom(room) {
-    let room = this.getRoom(room.roomUUID);
+  addRoom(room_id, room_uuid) {
+    let room = this.getRoom(room_id);
 
     if (!room) {
       let newRoom = {
-        roomID,
-        roomUUID,
+        room_id,
+        room_uuid,
         users: [],
-        currentTime: 0,
+        video: {
+          currentTime: 0,
+          duration: 0,
+          state: null
+        }
       };
-      this.room.push(newRoom);
+      this.rooms.push(newRoom);
       return newRoom;
     } else {
       return room;
     }
   }
 
-  addUser(user, room) {
-    let room = getRoom(room.roomUUID);
+  getAllRooms() {
+    return this.rooms;
+  }
+
+  getRoom(room_id) {
+    return this.rooms.filter((room) => room.room_id === room_id)[0];
+  }
+
+  getVideoInfo(room_id){
+    return this.rooms.filter((room) => room.room_id === room_id)[0].video;
+  }
+
+  removeRoom(room_id) {
+    let room = this.getRoom(room_id);
 
     if (room) {
-      room.users.push(user);
+      this.room = this.room.filter((room) => room.room_id !== room_id);
     }
 
     return room;
   }
 
-  getRoomList(roomUUID) {
-    let rooms = this.rooms.filter((room) => room.roomUUID === roomUUID);
-    return rooms;
-  }
+  addUser(room_id, user){
+    let room = this.getRoom(room_id);
+    if(room){
+      room.users.push(user)
+    }else{
 
-  getRoom(roomUUID) {
-    return this.rooms.filter((room) => room.roomUUID === roomUUID)[0];
-  }
-
-  removeRoom(roomUUID) {
-    let room = this.getRoom(roomUUID);
-
-    if (room) {
-      this.room = this.room.filter((room) => room.roomUUID !== roomUUID);
     }
-
-    return room;
   }
+
+  getUsers(room_id){
+    let room = this.rooms.filter((room) => room.room_id === room_id)[0];
+    return room.users;
+  }
+
+
 }
 
 module.exports = { Rooms };

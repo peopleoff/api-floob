@@ -4,7 +4,7 @@ module.exports = {
   saveMessage(payload) {
     let newMessage = {
       user: payload.user.id,
-      room: payload.roomID,
+      room: payload.room_id,
       message: payload.message
     }
     messages

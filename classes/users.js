@@ -6,10 +6,10 @@ class Users {
     this.users = [];
   }
 
-  addUser(socketID, roomID, user) {
+  addUser(socketID, room_id, user) {
     let newUser = {
       socketID,
-      roomID,
+      room_id,
       user,
       currentTime: 0,
       duration: 0,
@@ -18,8 +18,8 @@ class Users {
     return newUser;
   }
 
-  getUserList(roomID) {
-    let users = this.users.filter((user) => user.roomID === roomID);
+  getUserList(room_id) {
+    let users = this.users.filter((user) => user.room_id === room_id);
     return users;
   }
 
@@ -36,12 +36,12 @@ class Users {
   }
 
   getRooms() {
-    let rooms = [...new Set(this.users.map((user) => user.roomID))];
+    let rooms = [...new Set(this.users.map((user) => user.room_id))];
     return rooms;
   }
 
-  getHighestCurrentTime(roomID) {
-    let users = this.getUserList(roomID);
+  getHighestCurrentTime(room_id) {
+    let users = this.getUserList(room_id);
     let highestCurrentTime = Math.max.apply(
       Math,
       users.map(function (user) {

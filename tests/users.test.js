@@ -10,21 +10,21 @@ beforeEach(() => {
     {
       socketID: 100,
       username: "Legendary Soviet",
-      roomID: "8dj28d",
+      room_id: "8dj28d",
       currentTime: 0,
       duration: 0,
     },
     {
       socketID: 200,
       username: "Anthony Kings",
-      roomID: "8dj28d",
+      room_id: "8dj28d",
       currentTime: 0,
       duration: 0,
     },
     {
       socketID: 300,
       username: "Koala Wully",
-      roomID: "8dj28d2",
+      room_id: "8dj28d2",
       currentTime: 0,
       duration: 0,
     },
@@ -36,31 +36,31 @@ test("Should add a new user", () => {
   let user = {
     socketID: 200,
     username: "Test User",
-    roomID: "8dj28d",
+    room_id: "8dj28d",
     currentTime: 0,
     duration: 0,
   };
 
-  let returnUsers = users.addUser(user.socketID, user.username, user.roomID);
+  let returnUsers = users.addUser(user.socketID, user.username, user.room_id);
 
   expect(users.users).toEqual([user]);
 });
 
-test("Should return names for roomID 8dj28d", () => {
+test("Should return names for room_id 8dj28d", () => {
   let userList = users.getUserList("8dj28d");
 
   expect(userList).toEqual([
     {
       socketID: 100,
       username: "Legendary Soviet",
-      roomID: "8dj28d",
+      room_id: "8dj28d",
       currentTime: 0,
       duration: 0,
     },
     {
       socketID: 200,
       username: "Anthony Kings",
-      roomID: "8dj28d",
+      room_id: "8dj28d",
       currentTime: 0,
       duration: 0,
     },

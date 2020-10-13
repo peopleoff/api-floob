@@ -127,7 +127,7 @@ module.exports = {
               email: response.email,
               username: response.username,
               color: response.color,
-              room: response.userRoom.roomUUID,
+              room: response.userRoom.room_uuid,
             };
             let token = signUser(user);
             return res.status(200).send({ token });

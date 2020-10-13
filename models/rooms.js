@@ -15,7 +15,7 @@ module.exports = function (sequelize, DataTypes) {
   const rooms = sequelize.define(
     "rooms",
     {
-      roomUUID: {
+      room_uuid: {
         type: DataTypes.UUID,
         defaultValue: generateRoomID,
         allowNull: true,
