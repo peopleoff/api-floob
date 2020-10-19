@@ -11,9 +11,6 @@
     "doc": "jsdoc api-floob.js"
   },
   "author": "",
-  "socket.io": {
-    "origins": "https://floob.club:* https://www.floob.club:* http://localhost:*"
-  },
   "license": "ISC",
   "dependencies": {
     "@sendgrid/mail": "^6.5.5",

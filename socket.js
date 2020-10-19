@@ -58,16 +58,15 @@ exports = module.exports = function (io) {
    */
   function getUserVideoPercent() {
     users.users.forEach((user) => {
+      console.log(user);
       io.to(user.socketID).emit("getCurrentVideoPercent");
     });
   }
   function sendHeartbeat() {
     //Send request for all users to update current timestamp
-    getUserVideoPercent();
     let allRooms = rooms.getAllRooms();
     allRooms.forEach((room) => {
-      // let highestCurrentTime = users.getHighestCurrentTime(room);
-      console.log(room);
+      io.to(room.room_id).emit("getCurrentVideoPercent");
       io.to(room.room_id).emit("heartbeat", room);
     });
   }
@@ -80,8 +79,10 @@ exports = module.exports = function (io) {
    */
   function enterRoom(payload, socket) {
     //Join user to socket room based on room ID
-    const { room, user } = payload;
-    
+    let { room, user } = payload;
+
+    console.log(socket.id);
+
     socket.join(room.id);
 
     //If user is not logged in, generate random temp user
@@ -95,6 +96,9 @@ exports = module.exports = function (io) {
 
     //Find if room is already created
     let findRoom = rooms.getRoom(room.id);
+
+    //Add socketID to user object
+    user.socketID = socket.id;
 
     //If room is not created yet, create room then add user
     //Else just add user to room
@@ -115,9 +119,10 @@ exports = module.exports = function (io) {
    * @param {socket} socket - Socket.io socket object
    */
   function leaveRoom(socket) {
-    let user = users.removeUser(socket.id);
+    let user = rooms.removeUser(socket.id);
     if (user) {
-      io.to(user.room).emit("updateUserList", users.getUserList(user.room));
+      let room = rooms.getRoom(user.room);
+      io.to(user.room).emit("updateUserList", room);
       io.to(user.room).emit("userDisconnect", {
         username: user.name,
       });
@@ -136,6 +141,16 @@ exports = module.exports = function (io) {
       seconds: payload.seconds,
       player_id: payload.player_id,
     });
+  }
+
+  function getTimeToSync(payload, socket) {
+    // const latestVideoTime = rooms.getAllRooms(payload.room_id);
+    const videoInfo = rooms.getCurrentVideoInfo(payload.room_id);
+    const room = rooms.getRoom(payload.room_id);
+    socket.emit("sendTimeToSync", {
+      seconds: videoInfo,
+    });
+    io.to(room.room_id).emit("heartbeat", room);
   }
   /**
    * Sends a socket event to play(unpause) the video
@@ -173,11 +188,9 @@ exports = module.exports = function (io) {
    * @param {socket} socket - Socket.io socket object
    */
   function updateVideo(payload, socket) {
-    users.updateUserVideoTimestamp(payload, socket.id);
-    io.to(payload.room_id).emit(
-      "updateUserList",
-      users.getUserList(payload.room_id)
-    );
+    console.log(payload);
+    rooms.updateUserVideoInfo(socket.id, payload);
+    // users.updateUserVideoTimestamp(payload, socket.id);
   }
   /**
    * Sends a socket event to set player speed
@@ -240,6 +253,10 @@ exports = module.exports = function (io) {
 
     socket.on("playVideo", (payload) => {
       playVideo(payload, socket);
+    });
+
+    socket.on("getTimeToSync", (payload) => {
+      getTimeToSync(payload, socket);
     });
 
     socket.on("pauseVideo", (payload) => {

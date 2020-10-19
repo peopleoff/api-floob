@@ -28,7 +28,7 @@ class Users {
     let tempLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
 
     let tempUser = {
-      id: '1',
+      id: Math.floor(Math.random() * Math.floor(10000)),
       username: `${tempFirstName} ${tempLastName}`,
       color: "#fff"
     }
