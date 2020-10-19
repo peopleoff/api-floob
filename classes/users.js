@@ -4,6 +4,7 @@ const lastNames = ["Uchiha", "Anime", "Names", "Hatake", "Muto", "Uzumaki"];
 class Users {
   constructor() {
     this.users = [];
+    
   }
 
   addUser(socketID, room_id, user) {
