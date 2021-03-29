@@ -1,6 +1,7 @@
 const { videos, vote_to_skip, rooms, users } = require("../models");
 const { addYouTubeVideo, searchYoutubeVideo } = require("./YouTubeController");
 const { searchVimeoVideo, addVimeoVideo } = require("./VimeoController");
+const { addCrunchyRollVideo } = require("./AnimeController.js");
 const { response } = require("express");
 const e = require("express");
 
@@ -172,6 +173,7 @@ module.exports = {
   },
   postVideo(req, res) {
     let io = req.app.get("io");
+    console.log(req.body);
 
     switch (req.body.provider) {
       case 1:
@@ -195,6 +197,24 @@ module.exports = {
       case 2:
         console.log("Vimeo");
         addVimeoVideo(req.body)
+          .then((result) => {
+            module.exports
+              .getAll(req.body.room)
+              .then((result) => {
+                io.sockets.in(req.body.room).emit("getVideos", result);
+                res.status(200).send(result);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
+      case 3:
+        console.log("Crunchyroll");
+        addCrunchyRollVideo(req.body)
           .then((result) => {
             module.exports
               .getAll(req.body.room)
