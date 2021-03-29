@@ -58,7 +58,6 @@ exports = module.exports = function (io) {
    */
   function getUserVideoPercent() {
     users.users.forEach((user) => {
-      console.log(user);
       io.to(user.socketID).emit("getCurrentVideoPercent");
     });
   }
@@ -80,8 +79,6 @@ exports = module.exports = function (io) {
   function enterRoom(payload, socket) {
     //Join user to socket room based on room ID
     let { room, user } = payload;
-
-    console.log(socket.id);
 
     socket.join(room.id);
 
@@ -188,7 +185,6 @@ exports = module.exports = function (io) {
    * @param {socket} socket - Socket.io socket object
    */
   function updateVideo(payload, socket) {
-    console.log(payload);
     rooms.updateUserVideoInfo(socket.id, payload);
     // users.updateUserVideoTimestamp(payload, socket.id);
   }

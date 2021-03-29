@@ -3,7 +3,7 @@ module.exports = function(sequelize, DataTypes) {
     "videos",
     {
       src: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(1000),
         allowNull: false
       },
       provider: {
