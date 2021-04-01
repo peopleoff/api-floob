@@ -234,35 +234,22 @@ module.exports = {
         });
       });
   },
-  async register(req, res) {
-    if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
-      return res.status(400).send({
-        error: true,
-        type: "error",
-        message: "Error",
+  register(req, res) {
+    rooms
+      .create({
+        name: randomName(),
+        user: req.body.user,
+      })
+      .then((result) => {
+        return res.send({
+          room: result.room_uuid,
+        });
+      })
+      .catch((error) => {
+        return res.status(500).send({
+          message: error,
+        });
       });
-    }
-    
-    try {
-      let [room] = await rooms.findOrCreate({
-        where: {
-          user: req.body.user,
-        },
-        defaults: {
-          name: randomName(),
-          user: req.body.user,
-        },
-      });
-      return res.status(200).send({
-        room: room.room_uuid,
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).send({
-        type: "error",
-        message: "Error Creating room, Please try again or Contact Support",
-      });
-    }
   },
   toggleRoom(req, res) {
     if (!req.body) {
