@@ -85,7 +85,7 @@ module.exports = {
               id: response.id,
               email: response.email,
               username: response.username,
-              color: response.color
+              color: response.color,
             };
             let token = signUser(user);
             if (process.env.ENV !== "DEVELOPMENT") {
@@ -102,8 +102,9 @@ module.exports = {
       });
   },
   login(req, res) {
-    let username = req.body.username.toLowerCase();
-    let password = req.body.password;
+    const username = req.body.username.toLowerCase();
+    const password = req.body.password;
+    //Search both username or email for login
     users
       .findOne({
         where: {
@@ -116,28 +117,31 @@ module.exports = {
       })
       .then((response) => {
         if (!response) {
-          return res.send({
+          //If no response, username does not exsist.
+          return res.status(401).send({
             message: "Username or Password is incorrect",
           });
-        } else {
-          let passwordMatch = bcrypt.compareSync(password, response.password);
-          if (passwordMatch) {
-            let user = {
-              id: response.id,
-              email: response.email,
-              username: response.username,
-              color: response.color,
-              room: response.userRoom.room_uuid,
-            };
-            let token = signUser(user);
-            return res.status(200).send({ token });
-          } else {
-            return res.status(401).send({
-              error: true,
-              message: "Username or Password is incorrect",
-            });
-          }
         }
+        //If passwords don't match, return 401
+        const passwordMatch = bcrypt.compareSync(password, response.password);
+        if (!passwordMatch) {
+          return res.status(401).send({
+            message: "Username or Password is incorrect",
+          });
+        }
+        //Create default user object
+        let user = {
+          id: response.id,
+          email: response.email,
+          username: response.username,
+          color: response.color,
+        };
+        //Add room info if user already has a room
+        if (response.userRoom) {
+          user.room = response.userRoom.room_uuid;
+        }
+        const token = signUser(user);
+        return res.send({ token });
       });
   },
   getUser(req, res) {
