@@ -12,6 +12,11 @@ function parseChannel(url) {
   return splitURL[splitURL.length - 2].replace(/-/g, " ");
 }
 
+function parseChannelLink(url) {
+  const lastIndex = url.lastIndexOf("/");
+  return url.substring(0, lastIndex);
+}
+
 module.exports = {
   async addCrunchyRollVideo(video) {
     return new Promise((resolve, reject) => {
@@ -23,7 +28,7 @@ module.exports = {
         })
         .then((result) => {
           const videoURL = result.data.best;
-          video.channelLink = video.src;
+          video.channelLink = parseChannelLink(originalURL);
           video.src = videoURL;
           video.channel = parseChannel(originalURL);
           video.title = parseTitle(originalURL);
