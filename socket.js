@@ -80,7 +80,9 @@ exports = module.exports = function (io) {
     //Join user to socket room based on room ID
     let { room, user } = payload;
 
-    socket.join(room.id);
+    if (room) {
+      socket.join(room.id);
+    }
 
     //If user is not logged in, generate random temp user
     if (!user) {
