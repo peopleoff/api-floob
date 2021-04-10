@@ -20,7 +20,7 @@ async function getYoutubeVideoInfo(video) {
     video.image = parseImage(apiResponse.thumbnails);
     return video;
   } catch (error) {
-    console.error(error);
+    errorHandler(error);
   }
 }
 async function getYouTubeSearch(query) {

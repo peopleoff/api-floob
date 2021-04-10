@@ -1,4 +1,5 @@
 const { messages } = require('../models')
+const { errorHandler } = require("../functions");
 
 module.exports = {
   saveMessage(payload) {
@@ -11,7 +12,7 @@ module.exports = {
       .create(newMessage)
       .then(result => {})
       .catch(error => {
-        throw error
+        errorHandler(error);
       })
   }
 }

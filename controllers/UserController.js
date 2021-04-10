@@ -10,6 +10,7 @@ const jwtSecret = require("../config/config").authentication.jwtSecret;
 const salt = require("../config/config").authentication.salt;
 const sgMail = require("@sendgrid/mail");
 const Sequelize = require("sequelize");
+const { errorHandler } = require("../functions");
 const Op = Sequelize.Op;
 sgMail.setApiKey(process.env.API_FLOOB_SENDGRIDAPI);
 
@@ -96,6 +97,7 @@ module.exports = {
         }
       })
       .catch((err) => {
+        errorHandler(err);
         return res.send({
           message: err,
         });
@@ -230,7 +232,7 @@ module.exports = {
         return res.send(result);
       })
       .catch((error) => {
-        console.error(error);
+        errorHandler(error);
       });
   },
   changePassword(req, res) {
@@ -272,6 +274,7 @@ module.exports = {
           }
         })
         .catch((error) => {
+          errorHandler(error);
           return res.status(401).send({
             message: "Error updating password. Please try to reset again.",
           });

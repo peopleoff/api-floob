@@ -19,8 +19,7 @@ require("./routes")(app);
 
 if (process.env.ENV == "PRODUCTION") {
   Sentry.init({
-    dsn:
-      "https://7580653f7aa84fd1ad0d27fb2569c691@o330708.ingest.sentry.io/5260940",
+    dsn: process.env.SENTRY_DSN,
   });
   app.use(Sentry.Handlers.errorHandler());
 }

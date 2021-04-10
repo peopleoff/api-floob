@@ -6,6 +6,7 @@ const {
   videos,
 } = require("../models");
 const fs = require("fs");
+const { errorHandler } = require("../functions");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
@@ -45,14 +46,6 @@ module.exports = {
         ],
       })
       .then((result) => {
-        //Set result to global var
-        // publicRooms = result.sort((one, other) => {
-        //   //a - b is
-        //   //   0 when elements are the same
-        //   //  >0 when a > b
-        //   //  <0 when a < b
-        //   return other.videos.length - one.videos.length
-        // });
         publicRooms = result.filter((room) => {
           return room.type === 2;
         });
@@ -62,62 +55,14 @@ module.exports = {
         recommendedRooms = result.filter((room) => {
           return room.type === 5;
         });
-        // publicRooms = publicRooms.sort((one, other) => {
-        //   //a - b is
-        //   //   0 when elements are the same
-        //   //  >0 when a > b
-        //   //  <0 when a < b
-        //   return other.videos.length - one.videos.length
-        // });
-        // sponsoredRooms = sponsoredRooms.sort((one, other) => {
-        //   //a - b is
-        //   //   0 when elements are the same
-        //   //  >0 when a > b
-        //   //  <0 when a < b
-        //   return other.videos.length - one.videos.length
-        // });
-        // recommendedRooms = recommendedRooms.sort((one, other) => {
-        //   //a - b is
-        //   //   0 when elements are the same
-        //   //  >0 when a > b
-        //   //  <0 when a < b
-        //   return other.videos.length - one.videos.length
-        // });
         return res.send({
           publicRooms: publicRooms,
           sponsoredRooms: sponsoredRooms,
           recommendedRooms: recommendedRooms,
         });
-        // if (!req.body.user) {
-        // }
-        //Next find all rooms for user if logged in.
-        // users_rooms
-        //   .findAll({
-        //     where: {
-        //       user: req.body.user
-        //     },
-        //     include: [
-        //       {
-        //         model: users,
-        //         as: 'roomUser'
-        //       },
-        //       {
-        //         model: rooms,
-        //         as: 'roomInfo'
-        //       }
-        //     ]
-        //   })
-        //   .then(response => {
-        //     //Set result to global var
-        //     favoriteRooms = response
-        //     //Send global vars
-        //     return res.send({
-        //       publicRooms: publicRooms,
-        //       favoriteRooms: favoriteRooms
-        //     })
-        //   })
       })
       .catch((error) => {
+        errorHandler(error);
         return res.send({
           error: true,
           type: "error",
@@ -137,6 +82,7 @@ module.exports = {
         return res.status(200).send(room);
       })
       .catch((error) => {
+        errorHandler(error);
         return res.status(401).send({
           type: "error",
           message: error.message,
@@ -176,7 +122,7 @@ module.exports = {
         console.log("User Added");
       })
       .catch((error) => {
-        console.error(error);
+        errorHandler(error);
       });
   },
   removeFromRoom(payload, socketID) {
@@ -227,6 +173,7 @@ module.exports = {
         }
       })
       .catch((error) => {
+        errorHandler(error);
         return res.send({
           error: true,
           type: "error",
@@ -246,6 +193,7 @@ module.exports = {
         });
       })
       .catch((error) => {
+        errorHandler(error);
         return res.status(500).send({
           message: error,
         });
@@ -286,7 +234,7 @@ module.exports = {
               }
             })
             .catch((deletedError) => {
-              console.error(deletedError);
+              errorHandler(deletedError);
             });
         } else {
           users_rooms
@@ -301,12 +249,12 @@ module.exports = {
               }
             })
             .catch((createdError) => {
-              console.error(createdError);
+              errorHandler(createdError);
             });
         }
       })
       .catch((error) => {
-        console.error(error);
+        errorHandler(error);
       });
   },
 };

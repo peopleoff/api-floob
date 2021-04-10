@@ -1,54 +1,55 @@
-require('dotenv').config()
-const sgMail = require('@sendgrid/mail')
-sgMail.setApiKey(process.env.API_FLOOB_SENDGRIDAPI)
+require("dotenv").config();
+const sgMail = require("@sendgrid/mail");
+const { errorHandler } = require("../functions");
+sgMail.setApiKey(process.env.API_FLOOB_SENDGRIDAPI);
 
 module.exports = {
   passwordResetEmail(recipient, username, token) {
     const msg = {
       to: {
-        email: recipient
+        email: recipient,
       },
       from: {
-        name: 'Floob',
-        email: 'Support@floob.gg'
+        name: "Floob",
+        email: "Support@floob.gg",
       },
-      templateId: 'd-b7270eebc96d434baec84070b4af7c43',
+      templateId: "d-b7270eebc96d434baec84070b4af7c43",
       dynamic_template_data: {
-        subject: 'Floob Password Reset',
+        subject: "Floob Password Reset",
         username: username,
-        reset_link: `https://Floob.gg/user/change/${token}`
-      }
-    }
+        reset_link: `https://Floob.gg/user/change/${token}`,
+      },
+    };
     sgMail
       .send(msg)
-      .then(result => {
+      .then((result) => {
         console.log(result[0].complete);
       })
-      .catch(error => {
-        console.error(error)
-      })
+      .catch((error) => {
+        errorHandler(error);
+      });
   },
   welcomeEmail(recipient) {
     const msg = {
       to: {
-        email: recipient
+        email: recipient,
       },
       from: {
-        name: 'Floob',
-        email: 'Support@floob.gg'
+        name: "Floob",
+        email: "Support@floob.gg",
       },
-      templateId: 'd-c30d2b4f5aeb47c49626629dc0d96a94',
+      templateId: "d-c30d2b4f5aeb47c49626629dc0d96a94",
       dynamic_template_data: {
-        subject: 'Welcome to Floob!'
-      }
-    }
+        subject: "Welcome to Floob!",
+      },
+    };
     sgMail
       .send(msg)
-      .then(result => {
-        console.log(result[0].complete)
+      .then((result) => {
+        console.log(result[0].complete);
       })
-      .catch(error => {
-        console.error(error.response.body)
-      })
-  }
-}
+      .catch((error) => {
+        errorHandler(error);
+      });
+  },
+};

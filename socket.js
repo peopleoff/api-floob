@@ -9,7 +9,7 @@ let users = new Users();
 let rooms = new Rooms();
 
 //Functions
-const { guid } = require("./functions");
+const { guid, errorHandler } = require("./functions");
 
 exports = module.exports = function (io) {
   // <----------------------------Functions----------------------------> //
@@ -213,12 +213,12 @@ exports = module.exports = function (io) {
               io.sockets.in(payload.room).emit("getVideos", videoResult);
             })
             .catch((error) => {
-              console.error(error);
+              errorHandler(error);
             });
         }
       })
       .catch((error) => {
-        console.error(error);
+        errorHandler(error);
       });
   }
   // <----------------------------Socket Functions----------------------------> //

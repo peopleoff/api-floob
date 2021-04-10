@@ -1,5 +1,6 @@
 const { videos } = require("../models");
 const axios = require("axios");
+const { errorHandler } = require("../functions");
 
 function parseTitle(url) {
   const splitURL = url.split("/");
@@ -42,7 +43,7 @@ module.exports = {
             });
         })
         .catch((error) => {
-          console.error(error);
+          errorHandler(error);
         });
     });
   },

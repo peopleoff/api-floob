@@ -1,4 +1,9 @@
+const Sentry = require("@sentry/node");
+
 module.exports = {
+  errorHandler(error){
+    errorHandler(error);
+  },
   validURL(str) {
     var pattern = new RegExp(
       "^(https?:\\/\\/)?" + // protocol

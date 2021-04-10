@@ -2,8 +2,7 @@ const { videos, vote_to_skip, rooms, users } = require("../models");
 const { addYouTubeVideo, searchYoutubeVideo } = require("./YouTubeController");
 const { searchVimeoVideo, addVimeoVideo } = require("./VimeoController");
 const { addCrunchyRollVideo } = require("./AnimeController.js");
-const { response } = require("express");
-const e = require("express");
+const { errorHandler } = require("../functions");
 
 videos.hasOne(users, {
   foreignKey: "id",
@@ -168,7 +167,7 @@ module.exports = {
         res.status(200).send(result);
       })
       .catch((error) => {
-        console.error(error);
+        errorHandler(error);
       });
   },
   postVideo(req, res) {
@@ -187,11 +186,11 @@ module.exports = {
                 res.status(200).send(result);
               })
               .catch((error) => {
-                console.error(error);
+                errorHandler(error);
               });
           })
           .catch((error) => {
-            console.error(error);
+            errorHandler(error);
           });
         break;
       case 2:
@@ -205,11 +204,11 @@ module.exports = {
                 res.status(200).send(result);
               })
               .catch((error) => {
-                console.error(error);
+                errorHandler(error);
               });
           })
           .catch((error) => {
-            console.error(error);
+            errorHandler(error);
           });
         break;
       case 3:
@@ -223,11 +222,11 @@ module.exports = {
                 res.status(200).send(result);
               })
               .catch((error) => {
-                console.error(error);
+                errorHandler(error);
               });
           })
           .catch((error) => {
-            console.error(error);
+            errorHandler(error);
           });
         break;
 
@@ -246,7 +245,7 @@ module.exports = {
             res.status(200).send(result);
           })
           .catch((error) => {
-            console.error(error);
+            res.status(403).send(error);
           });
         break;
       case 2:

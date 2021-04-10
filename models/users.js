@@ -1,10 +1,10 @@
 function pickRandomColor() {
   let colors = [
-    "#2f64EB",
-    "#634FD6",
-    "#00CCC2",
-    "#BB67F5",
-    "#161663"
+    "#FDDFDF",
+    "#FCF7DE",
+    "#DEFDE0",
+    "#DEF3FD",
+    "#F0DEFD"
   ];
   var color = colors[Math.floor(Math.random() * colors.length)];
   return color
